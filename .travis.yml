@@ -1,0 +1,12 @@
+language: python
+
+python:
+  - "3.7"
+
+before_install:
+  - sudo apt-get install build-essential -y
+
+script:
+  - make clean
+  - make
+  - make test
