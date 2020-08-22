@@ -3,6 +3,7 @@ int
 float
 bool
 if
+/* */
 then
 else
 while
@@ -13,3 +14,8 @@ return
 if else
 return loop
 if else loop return
+// alo aba 0F 0.F
+/* a
+aba 0.F 0AB return if
+# _ ?
+*/
