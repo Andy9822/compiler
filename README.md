@@ -1,4 +1,4 @@
-# flex-bison based Compiler [![Build Status](https://travis-ci.org/Andy9822/compiler.svg?branch=master)](https://travis-ci.org/Andy9822/compiler)
+# flex based Compiler [![Build Status](https://travis-ci.org/Andy9822/compiler.svg?branch=master)](https://travis-ci.org/Andy9822/compiler)
 
 Proposed and developed in UFRGS' Compilers course.
 You can clone or download this repository freely.
@@ -6,21 +6,21 @@ You can clone or download this repository freely.
 
 ### Prerequisites
 
-TLC is a flex-bison based compiler. So, you will need to install them.
+TLC is a flex based compiler. So, you will need to install it.
 You can use
 ```
-apt-get install flex
+sudo apt-get install flex
 ```
-and
+It also uses programming language C, so you will need GCC and make.
+
 ```
-apt-get install bison
+sudo apt-get install build-essential
 ```
-It also uses programming language C, so you will need GCC.
 
 ### Installing
 
 To get started, open the main folder on a Unix based system and type ```make```.
-This command should generate ```flex``` and ```bison``` necessary files.
+This command should generate ```flex``` necessary files.
 Also, with ```make```, you automatically generates the AST (Abstract Syntax Tree) for the language.
 
 ## Running the tests
