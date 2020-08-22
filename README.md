@@ -1,4 +1,4 @@
-# flex based Compiler [![Build Status](https://travis-ci.org/Andy9822/compiler.svg?branch=master)](https://travis-ci.org/Andy9822/compiler)
+# flex based Compiler [![Build Status](https://travis-ci.org/Andy9822/compiler.svg?branch=master)](https://travis-ci.org/Andy9822/compiler) [![Actions Status](https://github.com/Andy9822/compiler/workflows/test/badge.svg)](https://github.com/Andy9822/compiler/actions)
 
 Proposed and developed in UFRGS' Compilers course.
 You can clone or download this repository freely.
