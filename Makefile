@@ -13,7 +13,7 @@ lex.yy.c: scanner.l
 	lex scanner.l
 
 test:
-	make test-operators && make test-reserved
+	make test-operators && make test-reserved && make test-identifiers
 
 test-operators:
 	python run_lexer.py operators
@@ -22,6 +22,10 @@ test-operators:
 test-reserved:
 	python run_lexer.py reserved
 	python ./tests/compare_results.py reserved
+
+test-identifiers:
+	python run_lexer.py identifiers
+	python ./tests/compare_results.py identifiers
 
 clean:
 	rm lex.yy.c etapa1

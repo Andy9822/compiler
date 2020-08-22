@@ -4,7 +4,6 @@ from os import listdir
 from os.path import isfile, join
 
 tests_dir = "./tests/"
-
 OKGREEN = '\033[92m'
 REDFAIL = '\033[91m'
 ENDCOLOR ='\033[0m'
@@ -15,16 +14,16 @@ def test_directory(rule_name):
     for prefix in prefixes:
         resultFile =  tests_dir + rule_name + "/" + prefix + "_result.txt"
         expectedFile =  tests_dir + rule_name + "/" + prefix + "_expected.txt"
-        test_files(resultFile, expectedFile)
+        test_files(resultFile, expectedFile, rule_name)
 
-def test_files(file1, file2):
+def test_files(file1, file2, rule_name):
     print(file1,file2)
     comp = filecmp.cmp(file1, file2)
     if comp:
-        print(OKGREEN + str(comp) + ENDCOLOR)
+        print(OKGREEN + '[' + rule_name + '] ' + str(comp) + ENDCOLOR)
         sys.exit(0)
     else:
-        print(REDFAIL + str(comp) + ENDCOLOR)
+        print(REDFAIL + '[' + rule_name + '] ' + str(comp) + ENDCOLOR)
         sys.exit(-1)
 
 

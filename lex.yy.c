@@ -889,14 +889,15 @@ return KW_RETURN;
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 43 "scanner.l"
+#line 42 "scanner.l"
 return LIT_TRUE;
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 44 "scanner.l"
+#line 43 "scanner.l"
 return LIT_FALSE;
 	YY_BREAK
+/* Chars e Strings */
 case 15:
 YY_RULE_SETUP
 #line 46 "scanner.l"
@@ -910,101 +911,99 @@ return LIT_STRING;
 /* Caracteres especiais */
 case 17:
 YY_RULE_SETUP
-#line 49 "scanner.l"
+#line 50 "scanner.l"
 return yytext[0];
 	YY_BREAK
 /* Operadores compostos*/
 case 18:
 YY_RULE_SETUP
-#line 52 "scanner.l"
+#line 53 "scanner.l"
 return OPERATOR_LE;
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 53 "scanner.l"
+#line 54 "scanner.l"
 return OPERATOR_GE;
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 54 "scanner.l"
+#line 55 "scanner.l"
 return OPERATOR_EQ;
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 55 "scanner.l"
+#line 56 "scanner.l"
 return OPERATOR_DIF;
 	YY_BREAK
 /* Identificadores */
 case 22:
 YY_RULE_SETUP
-#line 58 "scanner.l"
+#line 59 "scanner.l"
 return TK_IDENTIFIER;
 	YY_BREAK
-/*Literais */
-/* Literal inteiro*/
+/*Literais Inteiro e Float*/
 case 23:
 YY_RULE_SETUP
 #line 62 "scanner.l"
 return LIT_INTEGER;
 	YY_BREAK
-/* Literal float*/
 case 24:
 YY_RULE_SETUP
-#line 64 "scanner.l"
+#line 63 "scanner.l"
 return LIT_FLOAT;
 	YY_BREAK
 /* Ignorar tabs */
 case 25:
 YY_RULE_SETUP
-#line 67 "scanner.l"
+#line 66 "scanner.l"
 
 	YY_BREAK
 /* contabilizar linha*/
 case 26:
 /* rule 26 can match eol */
 YY_RULE_SETUP
-#line 70 "scanner.l"
+#line 69 "scanner.l"
 ++lineNumber;
 	YY_BREAK
 /* Comentarios*/
 case 27:
 YY_RULE_SETUP
-#line 73 "scanner.l"
+#line 72 "scanner.l"
 
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 74 "scanner.l"
+#line 73 "scanner.l"
 BEGIN(COMMENT);
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 76 "scanner.l"
+#line 75 "scanner.l"
 return TOKEN_ERROR;
 	YY_BREAK
 /* Gramatica dos comentarios*/
 case 30:
 YY_RULE_SETUP
-#line 79 "scanner.l"
+#line 78 "scanner.l"
 
 	YY_BREAK
 case 31:
 /* rule 31 can match eol */
 YY_RULE_SETUP
-#line 80 "scanner.l"
+#line 79 "scanner.l"
 ++lineNumber;
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 81 "scanner.l"
+#line 80 "scanner.l"
 BEGIN(INITIAL);
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 84 "scanner.l"
+#line 83 "scanner.l"
 ECHO;
 	YY_BREAK
-#line 1008 "lex.yy.c"
+#line 1007 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(COMMENT):
 	yyterminate();
@@ -2010,7 +2009,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 84 "scanner.l"
+#line 83 "scanner.l"
 
 
 #include "main.c"
