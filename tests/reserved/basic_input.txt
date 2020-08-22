@@ -1,0 +1,15 @@
+char
+int
+float
+bool
+if
+then
+else
+while
+loop
+read
+print
+return
+if else
+return loop
+if else loop return

@@ -1,0 +1,51 @@
+TRUE FALSE
+'f'
+"andy" "rafael"
+B5C34
+//<= >= == !=
+/*ZEZIN
+ZezIN
+_zezin
+_zDzin
+@_zDzin
+meu1var
+meu1v_ar
+meu1v_a@r
+1.
+1. aranguiz
+1 . aranguiz
+1 .aranguiz*/
+/*1.F
+10
+.F
+FA
+F.B
+1.
+int x : 1999,
+354  ABC6969
+354
+hhh
+int y : 1224
+,
+;
+:
+(
+)
+[
+]
+{
+}
++
+-
+*
+/
+<
+>
+=
+|
+^
+~
+&
+$
+#
+*/
