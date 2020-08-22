@@ -25,9 +25,9 @@ Also, with ```make```, you automatically generates the AST (Abstract Syntax Tree
 
 ## Running the tests
 
-To test, you can use ```make test```.
+The project is divided in parts, so each part folder contains a specific stage of the compiler.
 Each part has a different set of tests.
-You can just get into the part specific folder and run the command.
+To test, you can use ```make test```.
 
 ## Parts
 
