@@ -1,7 +1,14 @@
 %{
   #include "tokens.h"
+  #include "hash.c"
+
   int Running = 1;
   int lineNumber = 1;
+
+  void initMe(void) {
+    Running = 1;
+    lineNumber = 1;
+  }
 
   int getLineNumber(void) {
     return lineNumber;
@@ -42,8 +49,8 @@ OPERATOR_DIFF "!="
 "FALSE" return LIT_FALSE;
 
   /* Chars e Strings */
-{CHAR} return LIT_CHAR;
-{STRING} return LIT_STRING;
+{CHAR} { hashInsert(yytext); return LIT_CHAR;}
+{STRING} { hashInsert(yytext); return LIT_STRING;}
 
   /* Caracteres especiais */
 {SPECIAL_CHARS} return yytext[0];
@@ -55,11 +62,11 @@ OPERATOR_DIFF "!="
 {OPERATOR_DIFF} return OPERATOR_DIF;
 
   /* Identificadores */
-({LETTER}|[_@])+({LETTER}|[0-9_@])* return TK_IDENTIFIER;
+({LETTER}|[_@])+({LETTER}|[0-9_@])* { hashInsert(yytext); return TK_IDENTIFIER;}
 
   /*Literais Inteiro e Float*/
-{HEX}+ return LIT_INTEGER;
-{HEX}*"."{HEX}+ return LIT_FLOAT;
+{HEX}+ { hashInsert(yytext); return LIT_INTEGER;}
+{HEX}*"."{HEX}+ { hashInsert(yytext); return LIT_FLOAT;}
 
   /* Ignorar tabs */
 [ \t]

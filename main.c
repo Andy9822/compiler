@@ -10,6 +10,8 @@ int main(int argc, char **argv) {
     exit(2);
   }
 
+  initMe();
+
   int tok;
   while (Running) {
     tok = yylex();
@@ -63,5 +65,7 @@ int main(int argc, char **argv) {
       default: printf("Simbolo %c [line:%d]\n", tok, lineNumber); break;
     }
   }
+
+  // hashPrint();
   return 0;
 }
