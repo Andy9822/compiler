@@ -10,7 +10,6 @@ int main(int argc, char **argv) {
     exit(2);
   }
 
-  initMe();
 
   int tok;
   while (Running) {

@@ -6,6 +6,7 @@
   int lineNumber = 1;
 
   void initMe(void) {
+    hash_init();
     Running = 1;
     lineNumber = 1;
   }
