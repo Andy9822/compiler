@@ -1,4 +1,6 @@
 %{
+  #include <stdlib.h>
+  #include <string.h>
   #include "tokens.h"
   #include "hash.c"
 
