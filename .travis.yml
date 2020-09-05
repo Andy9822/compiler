@@ -5,6 +5,7 @@ python:
 
 before_install:
   - sudo apt-get install build-essential -y
+  - cd etapa1/
 
 script:
   - make clean

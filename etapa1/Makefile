@@ -8,7 +8,7 @@
 #
 
 etapa1: lex.yy.c
-	gcc -o etapa1 lex.yy.c
+	gcc -o etapa1.out lex.yy.c
 lex.yy.c: scanner.l
 	lex scanner.l
 
@@ -32,4 +32,4 @@ test:
 	make test-operators && make test-reserved && make test-identifiers && make test-symbols
 
 clean:
-	rm lex.yy.c etapa1
+	rm -f lex.yy.c etapa1.out

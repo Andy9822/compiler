@@ -10,9 +10,12 @@ on:
     branches: [ master ]
 
 jobs:
-  build:
+  etapa1:
 
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: etapa1
 
     steps:
     - uses: actions/checkout@v2
