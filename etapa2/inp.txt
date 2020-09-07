@@ -1,0 +1,9 @@
+bubua = int : 5;
+b = bool : TRUE;
+c = char : 'c';
+c = float : FA.24;
+int fun () {
+    a = 5
+    b = 777
+    x = 99 + b - (x) + (y - i)
+}

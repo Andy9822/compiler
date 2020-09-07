@@ -1,0 +1,32 @@
+bubua = int : 5;
+b = bool : TRUE;
+c = char : 'c';
+c = float : FA.24;
+
+bubua = int[2];
+b = bool[1];
+c = char[5];
+c = float[10];
+d = float [10];
+e = float [10];
+f = float [10] ;
+
+c = char : 'x';
+a = int: 0;
+i = int: 0;
+f = float: 0.0;
+v1 = int[10]: 0 0 0 0 0 0 0 0 0 0 ; 
+mat = int [ 10]; 
+
+bubua = int[2] : 0 24;
+du = int[1] : 24 ;
+bu = int[1] : 24;
+mu = int[1]: 24 ;
+cu = int[1]: 24;
+nu = int[1]:24 ;
+tu = int[1]:24;
+b = bool[1]: FALSE;
+x = bool[1] :TRUE;
+x = bool[2] : TRUE FALSE;
+c = char[5];
+c = float[10];
