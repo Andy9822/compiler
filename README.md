@@ -6,10 +6,14 @@ You can clone or download this repository freely.
 
 ### Prerequisites
 
-TLC is a flex based compiler. So, you will need to install it.
+This is a flex-bison based compiler. So, you will need to install them.
 You can use
 ```
 sudo apt-get install flex
+```
+and 
+```
+sudo apt-get install bison flex  
 ```
 It also uses programming language C, so you will need GCC and make.
 
