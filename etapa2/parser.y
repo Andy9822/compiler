@@ -42,8 +42,8 @@ declist: vardec ';' declist
     |
     ;
 
-funcdec: TK_IDENTIFIER '(' ')' '=' vartype body
-    | TK_IDENTIFIER '(' assignment assignmentlist ')' '=' vartype body
+funcdec: TK_IDENTIFIER '(' ')' '=' vartype block
+    | TK_IDENTIFIER '(' assignment assignmentlist ')' '=' vartype block
     ;
 
 vardec: assignment ':' varliteral 
@@ -71,7 +71,7 @@ vecvalues: varliteral vecvalues
     |
     ;
 
-body: '{' lcmd '}'
+block: '{' lcmd '}'
     ;
 
 lcmd: cmd lcmd
@@ -83,7 +83,7 @@ cmd: atribuition
     | printcommand
     | returncommand
     | flowcommand
-    | body
+    | block
     |
     ;
 
