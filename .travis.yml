@@ -13,4 +13,4 @@ script:
   - make test
   - cd ../etapa2
   - make build
-  - make test-globals
+  - make test
