@@ -1,9 +1,11 @@
-bubua = int : 5;
-b = bool : TRUE;
-c = char : 'c';
-c = float : FA.24;
-int fun () {
-    a = 5
-    b = 777
-    x = 99 + b - (x) + (y - i)
+
+fun (x = char) = int {
+   print "Incrementado algumas vezes a fica ", "oi"
+   if (a==15) then 
+   print "A=15\n"
+   print "oi", "tchau", "oi"
+   print "Incrementado algumas vezes a fica " ,a ,"\n"
+   no_params_call()
+   call_func(5, 6, (id * 4))
+   return (expression)
 }

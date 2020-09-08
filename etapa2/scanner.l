@@ -4,6 +4,14 @@
   #include "y.tab.h"
   #include "hash.c"
 
+  #define SYMBOL_LIT_INTEGER 1
+  #define SYMBOL_LIT_FLOAT 2
+  #define SYMBOL_LIT_TRUE 3
+  #define SYMBOL_LIT_FALSE 4
+  #define SYMBOL_LIT_CHAR 5
+  #define SYMBOL_LIT_STRING 6
+  #define SYMBOL_IDENTIFIER 7
+
   int Running = 1;
   int lineNumber = 1;
 
@@ -53,8 +61,8 @@ OPERATOR_DIFF "!="
 "FALSE" return LIT_FALSE;
 
   /* Chars e Strings */
-{CHAR} { hashInsert(yytext, LIT_CHAR); return LIT_CHAR;}
-{STRING} { hashInsert(yytext, LIT_STRING); return LIT_STRING;}
+{CHAR} { hashInsert(yytext, SYMBOL_LIT_CHAR); return LIT_CHAR;}
+{STRING} { hashInsert(yytext, SYMBOL_LIT_STRING); return LIT_STRING;}
 
   /* Caracteres especiais */
 {SPECIAL_CHARS} return yytext[0];
@@ -66,11 +74,11 @@ OPERATOR_DIFF "!="
 {OPERATOR_DIFF} return OPERATOR_DIF;
 
   /* Identificadores */
-({LETTER}|[_@])+({LETTER}|[0-9_@])* { hashInsert(yytext,TK_IDENTIFIER); return TK_IDENTIFIER;}
+({LETTER}|[_@])+({LETTER}|[0-9_@])* { hashInsert(yytext,SYMBOL_IDENTIFIER); return TK_IDENTIFIER;}
 
   /*Literais Inteiro e Float*/
-{HEX}+ { hashInsert(yytext, LIT_INTEGER); return LIT_INTEGER;}
-{HEX}*"."{HEX}+ { hashInsert(yytext, LIT_FLOAT); return LIT_FLOAT;}
+{HEX}+ { hashInsert(yytext, SYMBOL_LIT_INTEGER); return LIT_INTEGER;}
+{HEX}*"."{HEX}+ { hashInsert(yytext, SYMBOL_LIT_FLOAT); return LIT_FLOAT;}
 
   /* Ignorar tabs */
 [ \t]

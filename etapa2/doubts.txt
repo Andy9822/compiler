@@ -1,1 +1,31 @@
-else {} ou else ;
+yylval.symbol
+
+❗ pode ter chama de função no body sem mais? ou só via atribuição?
+✅- else {} ou else ;
+- string pode ser retorno de função
+❌- sem ; no fim da ultima função ou ultima declaração
+
+❌- return _ (vazio) pode?
+- print _ (vazio) pode?
+- Somente variáveis  escalares  são  aceitas  no  comando read (?????)
+
+✅- '-' expression precisa?
+
+✅- {_} e {} e {{}} é de boa?
+
+-Cada  função  é  descrita  por  um cabeçalho  seguido  de  seu  corpo,  
+sendo  que  o  corpo  da  função  é  um  bloco,  como  definido adiante. (???)
+
+- Tipos e Valores na tabela de Símbolos "TRUE" e "FALSE" também?
+
+- só pode comandos fluxo de controle dentro de blocos de funções? nada global digamos ?
+
+❓- //comentario n aceita se n tem espaço (?)
+
+- KW_PRINT expression sepa pegue expression expression sem virgula
+- KW_PRINT aceitando vazio (?????)
+- KW_PRINT aceitando if e mais nada (?????)
+
+aceitando } errada
+aceitando }; errada
+aceitando varios comandos com ;

@@ -24,8 +24,12 @@ test-globals:
 	python run_lexer.py globals
 	python ./tests/compare_results.py globals
 
+test-functions:
+	python run_lexer.py functions
+	python ./tests/compare_results.py functions
+
 test:
-	make test-globals
+	make test-globals && make test-functions
 
 clean:
 	rm -f lex.yy.c y.tab.c etapa2.out

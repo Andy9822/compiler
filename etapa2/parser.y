@@ -26,29 +26,27 @@
 %token LIT_STRING   
 %token TOKEN_ERROR
 
-%left '|' '&'
+%left '|' '^'
 %left '<' '>' OPERATOR_EQ OPERATOR_DIF OPERATOR_GE OPERATOR_LE
 %left '+' '-'
 %left '*' '/'
+%left '~'
 
 %%
 
-programa: decl
+programa: declist
     ;
 
-decl: dec resto
+declist: vardec ';' declist
+    | funcdec ';' declist
     |
     ;
 
-resto: ';' decl
-    |
+funcdec: TK_IDENTIFIER '(' ')' '=' vartype body
+    | TK_IDENTIFIER '(' assignment assignmentlist ')' '=' vartype body
     ;
 
-dec: vardec
-    | KW_INT TK_IDENTIFIER '(' ')' body
-    ;
-
-vardec: TK_IDENTIFIER '=' vartype ':' varliteral 
+vardec: assignment ':' varliteral 
     | vector
     ;
 
@@ -58,15 +56,15 @@ vartype: KW_CHAR
     | KW_INT
     ;
 
-varliteral: LIT_CHAR
-    | LIT_FALSE
-    | LIT_TRUE
-    | LIT_FLOAT
-    | LIT_INTEGER
+assignmentlist: ',' assignment assignmentlist 
+    |
     ;
 
-vector: TK_IDENTIFIER '=' vartype '[' LIT_INTEGER ']'
-    | TK_IDENTIFIER '=' vartype '[' LIT_INTEGER ']' ':' vecvalues
+assignment: TK_IDENTIFIER '=' vartype
+    ;
+
+vector: assignment '[' LIT_INTEGER ']'
+    | assignment '[' LIT_INTEGER ']' ':' vecvalues
     ;
 
 vecvalues: varliteral vecvalues
@@ -74,30 +72,86 @@ vecvalues: varliteral vecvalues
     ;
 
 body: '{' lcmd '}'
-    |
     ;
 
 lcmd: cmd lcmd
     |
     ;
 
-cmd: TK_IDENTIFIER '=' expression
-    | KW_IF expression cmd
-    | KW_IF expression cmd KW_ELSE cmd
+cmd: atribuition
+    | readcommand
+    | printcommand
+    | returncommand
+    | flowcommand
+    | body
+    |
     ;
 
-expression: LIT_INTEGER
-    | TK_IDENTIFIER
+flowcommand: ifcommand
+    | KW_WHILE '(' expression ')'
+    | KW_LOOP '(' TK_IDENTIFIER ':' expression ',' expression ',' expression ')' cmd
+    ;
+
+ifcommand: KW_IF '(' expression ')' KW_THEN cmd
+    | KW_IF '(' expression ')' KW_THEN cmd KW_ELSE cmd
+    ;
+
+returncommand: KW_RETURN expression
+    ;
+
+printcommand: KW_PRINT LIT_STRING printlist
+    | KW_PRINT expression printlist
+    ;
+
+printlist: ',' LIT_STRING printlist
+    | ',' expression printlist
+    |
+    ;
+
+readcommand: KW_READ TK_IDENTIFIER
+    ;
+
+atribuition: TK_IDENTIFIER '=' expression
+    | TK_IDENTIFIER '[' expression ']' '=' expression
+    ;
+
+expression: TK_IDENTIFIER 
+    | TK_IDENTIFIER  '[' expression ']'
+    | varliteral
     | expression '+' expression
     | expression '-' expression
     | expression '/' expression
     | expression '*' expression
+    | expression '>' expression
+    | expression '<' expression
+    | expression '|' expression
+    | expression '^' expression
+    | '~' expression
+    | '-' expression
     | expression OPERATOR_DIF expression
     | expression OPERATOR_EQ expression
     | expression OPERATOR_GE expression
     | expression OPERATOR_LE expression
     | '(' expression ')'
+    | functioncall
     ;
+
+
+varliteral: LIT_CHAR
+    | LIT_FALSE
+    | LIT_TRUE
+    | LIT_FLOAT
+    | LIT_INTEGER
+    ;
+
+functioncall: TK_IDENTIFIER '(' ')'
+    | TK_IDENTIFIER '(' expression expressionlist ')'
+    ;
+    
+expressionlist: ',' expression expressionlist
+    |
+    ;
+
 
 %%
 

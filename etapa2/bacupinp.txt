@@ -1,0 +1,24 @@
+
+//bubua = int : 5
+//b = bool : TRUE
+//c = char : 'c'
+c = float : FA.24;
+
+fun (x = char) = int {
+   loop ( myVar : 5 , TRUE , 5.F ) {}
+   if (TRUE) then return 5
+   if (TRUE) then return 5 else {{}}
+   if (ababa) then else if (ababa) then else
+   while ( expr ) 
+   print "Incrementado algumas vezes a fica ", "oi"
+   //if (a==15) then; 
+   print "A=15\n";
+   print "oi", "tchau, "beleza", ababa, "\n"
+   print "Incrementado algumas vezes a fica " ,a ,"\n"
+   44 44 44
+};
+
+
+/*if (a==15) then 
+print "A=15\n"
+*/
