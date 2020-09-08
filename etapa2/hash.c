@@ -24,7 +24,7 @@ int hashString(char string[]) {
     hash = ((hash * string[i]) % HASH_SIZE) + 1;
   }
 
-  return hash;
+  return hash-1;
 }
 
 HASH_NODE *hashFind(char *text){
