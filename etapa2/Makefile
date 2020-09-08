@@ -28,8 +28,16 @@ test-functions:
 	python run_lexer.py functions
 	python ./tests/compare_results.py functions
 
+test-prof:
+	python run_lexer.py prof
+	python ./tests/compare_results.py prof
+
+test-rafael:
+	python run_lexer.py rafael
+	python ./tests/compare_results.py rafael
+
 test:
-	make test-globals && make test-functions
+	make test-globals && make test-functions && make test-prof && make test-rafael
 
 clean:
 	rm -f lex.yy.c y.tab.c etapa2.out

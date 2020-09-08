@@ -26,6 +26,12 @@
 %token LIT_STRING   
 %token TOKEN_ERROR
 
+%{
+// Declarations to get rid of warnings abount not finding function when compiling
+// It will work just fine in the linking step of the compilation
+int yyerror();
+%}
+
 %left '|' '^'
 %left '<' '>' OPERATOR_EQ OPERATOR_DIF OPERATOR_GE OPERATOR_LE
 %left '+' '-'
@@ -75,7 +81,7 @@ block: '{' lcmd '}'
     ;
 
 lcmd: cmd lcmd
-    |
+    | cmd
     ;
 
 cmd: atribuition
