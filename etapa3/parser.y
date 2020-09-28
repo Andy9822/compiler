@@ -1,5 +1,9 @@
 %{
     #include "hash.h"
+    #include <stdio.h>
+    #include <stdlib.h>
+    int getLineNumber(void);
+    int yylex();    // TODO find better workaround
 %}
 
 %union

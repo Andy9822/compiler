@@ -1,9 +1,9 @@
 %{
   #include <stdlib.h>
   #include <string.h>
-  #include "hash.c"
+  #include "hash.h"
   #include "y.tab.h"
-
+  
   #define SYMBOL_LIT_INTEGER 1
   #define SYMBOL_LIT_FLOAT 2
   #define SYMBOL_LIT_TRUE 3
@@ -99,9 +99,6 @@ OPERATOR_DIFF "!="
 
 
 %%
-
-#include "y.tab.c"
-#include "main.c"
 
 int yywrap()
 {

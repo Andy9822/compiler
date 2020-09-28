@@ -1,3 +1,10 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include "hash.h"
+
+extern FILE *yyin;
+int yyparse();
+
 int main(int argc, char **argv) {
 
   if (argc < 2) {
