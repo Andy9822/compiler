@@ -1,7 +1,5 @@
 %{
-    #include "hash.h"
-    #include <stdio.h>
-    #include <stdlib.h>
+    #include "ast.h"
     int getLineNumber(void);
     int yylex();    // TODO find better workaround
 %}
@@ -9,6 +7,7 @@
 %union
 {
     HASH_NODE *symbol;
+    AST *ast;
 }
 
 %token KW_CHAR      
@@ -39,8 +38,11 @@
 %token LIT_STRING   
 %token TOKEN_ERROR
 
+%type<ast> expression
+%type<ast> varliteral
+
 %{
-// Declarations to get rid of warnings abount not finding function when compiling
+// Declarations to get rid of warnings about not finding function when compiling
 // It will work just fine in the linking step of the compilation
 int yyerror();
 %}
@@ -97,7 +99,7 @@ lcmd: cmd lcmd
     | cmd
     ;
 
-cmd: atribuition
+cmd: atribuition 
     | readcommand
     | printcommand
     | returncommand
@@ -130,37 +132,37 @@ printlist: ',' LIT_STRING printlist
 readcommand: KW_READ TK_IDENTIFIER
     ;
 
-atribuition: TK_IDENTIFIER '=' expression
+atribuition: TK_IDENTIFIER '=' expression {astPrint($3);}
     | TK_IDENTIFIER '[' expression ']' '=' expression
     ;
 
-expression: TK_IDENTIFIER  {fprintf(stderr, "Recebi %s\n", $1->text);}
-    | TK_IDENTIFIER  '[' expression ']'
-    | varliteral 
-    | expression '+' expression 
-    | expression '-' expression 
+expression: TK_IDENTIFIER  {$$ = AST_CREATE_SYMBOL($1);}
+    | TK_IDENTIFIER  '[' expression ']' {$$ = astCreate(AST_VECTOR_ACCESS, 0, AST_CREATE_SYMBOL($1), $3, 0, 0, 0);}
+    | varliteral                {$$ = $1;}
+    | expression '+' expression {$$ = astCreate(AST_ADD, 0, $1, $3, 0, 0, 0);}
+    | expression '-' expression {$$ = astCreate(AST_SUB, 0, $1, $3, 0, 0, 0);}
     | expression '/' expression 
     | expression '*' expression 
     | expression '>' expression 
     | expression '<' expression 
     | expression '|' expression
     | expression '^' expression
-    | '~' expression 
-    | '-' expression 
+    | '~' expression            {$$ = astCreate(AST_NOT, 0, $2, 0, 0, 0, 0);}
+    | '-' expression            {$$ = astCreate(AST_MINUS, 0, $2, 0, 0, 0, 0);}
     | expression OPERATOR_DIF expression
     | expression OPERATOR_EQ expression
     | expression OPERATOR_GE expression
     | expression OPERATOR_LE expression
-    | '(' expression ')' 
-    | functioncall 
+    | '(' expression ')'            {$$ = $2;}
+    | functioncall                  
     ;
 
 
-varliteral: LIT_CHAR
-    | LIT_FALSE 
-    | LIT_TRUE
-    | LIT_FLOAT
-    | LIT_INTEGER  {fprintf(stderr, "Recebi %s\n", $1->text);}
+varliteral: LIT_CHAR     {$$ = AST_CREATE_SYMBOL($1);}
+    | LIT_FALSE          {$$ = AST_CREATE_SYMBOL($1);} 
+    | LIT_TRUE           {$$ = AST_CREATE_SYMBOL($1);}
+    | LIT_FLOAT          {$$ = AST_CREATE_SYMBOL($1);}
+    | LIT_INTEGER        {$$ = AST_CREATE_SYMBOL($1);}
     ;
 
 functioncall: TK_IDENTIFIER '(' ')'
