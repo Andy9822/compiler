@@ -66,6 +66,8 @@ checking_syntax_@(w = float) = bool {
   if ( 5 + (5 == (6 - 1)) != 12 ) then
     print "wat"
 
+  if ((5 + 6) | ((3 + ((2 - 4) + 5) * (14 / (16/4) )))) then print "a lot of parenthesis"
+
   if ( expression ) then {
       i = a_block
       i = with_assignments
@@ -92,6 +94,8 @@ checking_syntax_@(w = float) = bool {
 
   loop(id:1, 5 + 5, 2|4)
     print id, " without a block"
+
+  if (5 > 6) then else print "abcde", "jki", 'c'
 
   id_char = 'c'
   id_int = 15

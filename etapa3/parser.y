@@ -85,7 +85,7 @@ int yyerror();
 
 %%
 
-programa: declist {$$ = $1; Root = $$; astPrint($1, 0);}
+programa: declist {$$ = $1; Root = $$; /*astPrint($1, 0);*/}
     ;
 
 declist: vardec ';' declist {$$ = astCreate( AST_DECLIST, NULL, $1, $3, NULL, NULL, NULL); /*astPrint($1, 0);*/}
@@ -183,7 +183,7 @@ expression: TK_IDENTIFIER               {$$ = astCreateSymbol($1);}
     | expression OPERATOR_EQ expression {$$ = astCreate(AST_EQ, 0, $1, $3, 0, 0, 0);}
     | expression OPERATOR_GE expression {$$ = astCreate(AST_GE, 0, $1, $3, 0, 0, 0);}
     | expression OPERATOR_LE expression {$$ = astCreate(AST_LE, 0, $1, $3, 0, 0, 0);}
-    | '(' expression ')'                {$$ = $2;}
+    | '(' expression ')'                {$$ = astCreate(AST_PARENTHESIS, 0, $2, 0, 0, 0, 0);}
     | functioncall                      {$$ = $1;}
     ;
 

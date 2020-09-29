@@ -24,6 +24,7 @@ enum
    AST_EQ,
    AST_GE,
    AST_LE,
+   AST_PARENTHESIS,
 
    AST_BLOCK,
    AST_LCMD,
