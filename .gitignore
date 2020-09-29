@@ -54,4 +54,7 @@ dkms.conf
 # Building files
 lex.yy.c
 y.tab.*
-
+scanner.c
+etapa1
+etapa2
+etapa3
