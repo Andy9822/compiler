@@ -7,8 +7,10 @@
 # and #include "main.c" in the last part of the scanner.l
 #
 
+ETAPA=etapa3
+
 etapa3:  main.o y.tab.o lex.yy.o hash.o ast.o decompiler.o
-	gcc  main.o y.tab.o lex.yy.o hash.o ast.c decompiler.c -o etapa3
+	gcc  main.o y.tab.o lex.yy.o hash.o ast.c decompiler.c -o $(ETAPA)
 
 main.o: main.c
 	gcc -c main.c
@@ -39,9 +41,16 @@ build:
 	make --no-print-directory
 
 test:
-	./etapa3 tests/rafael/basic_input.txt output.txt
-	./etapa3 output.txt final.txt      
+	./$(ETAPA) tests/rafael/basic_input.txt output.txt
+	./$(ETAPA) output.txt final.txt      
 	diff output.txt final.txt  
 
+tar:
+	tar cvzf $(ETAPA).tgz .
+	chmod 744 $(ETAPA).tgz
+
+submit: tar
+	scp $(ETAPA).tgz  argarramones@html.inf.ufrgs.br:public_html/
+
 clean:
-	rm -f scanner.c lex.yy.c y.tab.c y.tab.h *.o etapa3
+	rm -f scanner.c lex.yy.c y.tab.c y.tab.h *.o $(ETAPA)
