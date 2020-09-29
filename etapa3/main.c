@@ -19,7 +19,7 @@ int main(int argc, char **argv) {
 
   hash_init();
   yyparse();
-  hashPrint();
+  // hashPrint();
   printf("Compilation successfull! \n");
   return 0;
 }

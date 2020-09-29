@@ -53,3 +53,5 @@ dkms.conf
 
 # Building files
 lex.yy.c
+y.tab.*
+
