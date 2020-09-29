@@ -55,4 +55,4 @@ test:
 	make test-globals && make test-functions && make test-prof && make test-rafael
 
 clean:
-	rm -f lex.yy.c y.tab.c y.tab.h *.o etapa3
+	rm -f scanner.c lex.yy.c y.tab.c y.tab.h *.o etapa3

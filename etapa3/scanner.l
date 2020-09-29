@@ -12,6 +12,11 @@
   #define SYMBOL_LIT_CHAR 5
   #define SYMBOL_LIT_STRING 6
   #define SYMBOL_IDENTIFIER 7
+  #define SYMBOL_KW_CHAR 8
+  #define SYMBOL_KW_INT 9
+  #define SYMBOL_KW_FLOAT 10
+  #define SYMBOL_KW_BOOL 11
+  #define SYMBOL_KW_FLOAT 10
 
   int Running = 1;
   int lineNumber = 1;
@@ -45,10 +50,10 @@ OPERATOR_DIFF "!="
 
 %%
   /* Palavras reservada*/
-"char" return KW_CHAR;
-"int" return KW_INT;
-"float" return KW_FLOAT;
-"bool" return KW_BOOL;
+"char" { yylval.symbol = hashInsert(yytext, SYMBOL_KW_CHAR); return KW_CHAR;}
+"int" { yylval.symbol = hashInsert(yytext, SYMBOL_KW_INT); return KW_INT;}
+"float" { yylval.symbol = hashInsert(yytext, SYMBOL_KW_FLOAT); return KW_FLOAT;}
+"bool" { yylval.symbol = hashInsert(yytext, SYMBOL_KW_BOOL); return KW_BOOL;}
 
 "if" return KW_IF;
 "then" return KW_THEN;
@@ -58,8 +63,9 @@ OPERATOR_DIFF "!="
 "read" return KW_READ;
 "print" return KW_PRINT;
 "return" return KW_RETURN;
-"TRUE" return LIT_TRUE;
-"FALSE" return LIT_FALSE;
+
+"TRUE"  { yylval.symbol = hashInsert(yytext, SYMBOL_LIT_TRUE); return LIT_TRUE;}
+"FALSE"  { yylval.symbol = hashInsert(yytext, SYMBOL_LIT_FALSE); return LIT_FALSE;}
 
   /* Chars e Strings */
 {CHAR} { yylval.symbol = hashInsert(yytext, SYMBOL_LIT_CHAR); return LIT_CHAR;}

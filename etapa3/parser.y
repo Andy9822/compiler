@@ -85,11 +85,11 @@ int yyerror();
 
 %%
 
-programa: declist {$$ = $1; Root = $$;}
+programa: declist {$$ = $1; Root = $$; astPrint($1, 0);}
     ;
 
-declist: vardec ';' declist {$$ = astCreate( AST_DECLIST, NULL, $1, $3, NULL, NULL, NULL);}
-    | funcdec ';' declist   {$$ = astCreate( AST_DECLIST, NULL, $1, $3, NULL, NULL, NULL); }
+declist: vardec ';' declist {$$ = astCreate( AST_DECLIST, NULL, $1, $3, NULL, NULL, NULL); /*astPrint($1, 0);*/}
+    | funcdec ';' declist   {$$ = astCreate( AST_DECLIST, NULL, $1, $3, NULL, NULL, NULL); /*astPrint($1, 0);*/}
     |                       {$$ = 0;}
     ;
 
@@ -97,7 +97,7 @@ funcdec: TK_IDENTIFIER '(' ')' '=' vartype block                        {$$ = as
     | TK_IDENTIFIER '(' assignment assignmentlist ')' '=' vartype block {$$ = astCreate(AST_FUNC_PARAMS_DEC, 0, astCreateSymbol($1), $3, $4, $7, $8);}
     ;
 
-vardec: assignment ':' varliteral {$$ = astCreate(AST_VARDEC, 0, $1, $3, 0, 0, 0);}
+vardec: assignment ':' varliteral {$$ = astCreate(AST_VARDEC, 0, $1, $3, 0, 0, 0); /*fprintf(stderr, "Recebi varliteral %s\n", $3->symbol->text);*/}
     | vector                      {$$ = $1;}
     ;
 
@@ -162,7 +162,7 @@ printlist: ',' LIT_STRING printlist         {$$ = astCreate(AST_PRINTLIST, 0,  a
 readcommand: KW_READ TK_IDENTIFIER          {$$ = astCreate(AST_READ, 0,  astCreateSymbol($2), 0, 0, 0, 0);}
     ;
 
-atribuition: TK_IDENTIFIER '=' expression { $$ = astCreate(AST_ATRIBUITION, 0,  astCreateSymbol($1), $3, 0, 0, 0);/*fprintf(stderr, "Recebi %s\n", $1->text);astPrint($3, 0);*/}
+atribuition: TK_IDENTIFIER '=' expression { $$ = astCreate(AST_ATRIBUITION, 0,  astCreateSymbol($1), $3, 0, 0, 0);}
     | TK_IDENTIFIER '[' expression ']' '=' expression {$$ = astCreate(AST_ATRIBUITION_VEC, 0, astCreateSymbol($1), $3, $6, 0, 0);}
     ;
 
