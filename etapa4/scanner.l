@@ -5,18 +5,6 @@
   #include "hash.h"
   #include "y.tab.h"
   
-  #define SYMBOL_LIT_INTEGER 1
-  #define SYMBOL_LIT_FLOAT 2
-  #define SYMBOL_LIT_TRUE 3
-  #define SYMBOL_LIT_FALSE 4
-  #define SYMBOL_LIT_CHAR 5
-  #define SYMBOL_LIT_STRING 6
-  #define SYMBOL_IDENTIFIER 7
-  #define SYMBOL_KW_CHAR 8
-  #define SYMBOL_KW_INT 9
-  #define SYMBOL_KW_FLOAT 10
-  #define SYMBOL_KW_BOOL 11
-  #define SYMBOL_KW_FLOAT 10
 
   int Running = 1;
   int lineNumber = 1;

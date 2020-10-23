@@ -28,8 +28,9 @@ int main(int argc, char **argv) {
 
   hash_init();
   yyparse();
-  decompile(Root, fp);
-  // hashPrint();
+  // decompile(Root, fp);
+  // astPrint(Root, 1);
+  hashPrint();
   
   printf("Compilation successfull! \n");
   return 0;

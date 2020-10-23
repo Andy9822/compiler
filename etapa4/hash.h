@@ -7,6 +7,22 @@
 
 #define HASH_SIZE 997
 
+#define SYMBOL_LIT_INTEGER 1
+#define SYMBOL_LIT_FLOAT 2
+#define SYMBOL_LIT_TRUE 3
+#define SYMBOL_LIT_FALSE 4
+#define SYMBOL_LIT_CHAR 5
+#define SYMBOL_LIT_STRING 6
+#define SYMBOL_IDENTIFIER 7
+#define SYMBOL_KW_CHAR 8
+#define SYMBOL_KW_INT 9
+#define SYMBOL_KW_FLOAT 10
+#define SYMBOL_KW_BOOL 11
+#define SYMBOL_KW_FLOAT 10
+#define SYMBOL_VARIABLE 11
+#define SYMBOL_VECTOR 12
+#define SYMBOL_FUNCTION 13
+
 typedef struct hash_node {
   int type;
   char *text;
@@ -19,4 +35,5 @@ int hashString(char string[]);
 HASH_NODE * hashInsert(char string[], int type);
 HASH_NODE *hashFind(char *text);
 void hashPrint();
+int hash_check_undeclared();
 #endif

@@ -1,5 +1,5 @@
 %{
-    #include "ast.h"
+    #include "semantic.h"
     int getLineNumber(void);
     int yylex();    // TODO find better workaround
     AST* Root = NULL;
@@ -85,7 +85,7 @@ int yyerror();
 
 %%
 
-programa: declist {$$ = $1; Root = $$; /*astPrint($1, 0);*/}
+programa: declist {$$ = $1; Root = $$; check_and_set_declarations(Root); check_undeclared(); /*astPrint($1, 0);*/}
     ;
 
 declist: vardec ';' declist {$$ = astCreate( AST_DECLIST, NULL, $1, $3, NULL, NULL, NULL); /*astPrint($1, 0);*/}
