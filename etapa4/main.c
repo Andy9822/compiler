@@ -5,6 +5,7 @@
 
 extern FILE *yyin;
 extern AST *Root;
+extern int SemanticErrors;
 
 int yyparse();
 
@@ -30,8 +31,9 @@ int main(int argc, char **argv) {
   yyparse();
   // decompile(Root, fp);
   // astPrint(Root, 1);
-  hashPrint();
+  // hashPrint();
   
   printf("Compilation successfull! \n");
+  // printf("SemanticErrors: %d! \n", SemanticErrors);
   return 0;
 }

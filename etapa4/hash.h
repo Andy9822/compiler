@@ -9,9 +9,9 @@
 
 #define SYMBOL_LIT_INTEGER 1
 #define SYMBOL_LIT_FLOAT 2
-#define SYMBOL_LIT_TRUE 3
-#define SYMBOL_LIT_FALSE 4
-#define SYMBOL_LIT_CHAR 5
+#define SYMBOL_LIT_CHAR 3
+#define SYMBOL_LIT_TRUE 4
+#define SYMBOL_LIT_FALSE 5
 #define SYMBOL_LIT_STRING 6
 #define SYMBOL_IDENTIFIER 7
 #define SYMBOL_KW_CHAR 8
@@ -23,8 +23,18 @@
 #define SYMBOL_VECTOR 12
 #define SYMBOL_FUNCTION 13
 
+enum
+{
+  DATATYPE_ERROR = -1,
+  DATATYPE_INT = 1,
+  DATATYPE_FLOAT,
+  DATATYPE_CHAR,
+  DATATYPE_BOOL,
+};
+
 typedef struct hash_node {
   int type;
+  int data_type;
   char *text;
   struct hash_node *next;
 } HASH_NODE;

@@ -1,0 +1,31 @@
+a = char: 1;
+b = char: 1.1;
+c = char: TRUE; // aqui eh pra dar erro
+d = char: FALSE; // aqui eh pra dar erro
+e = char: '1';
+
+a1 = int: 1;
+b1 = int: 1.1;
+c1 = int: TRUE; // aqui eh pra dar erro
+d1 = int: FALSE; // aqui eh pra dar erro
+e1 = int: '1';
+
+a2 = float: 1;
+b2 = float: 1.1;
+c2 = float: TRUE; // aqui eh pra dar erro
+d2 = float: FALSE; // aqui eh pra dar erro
+e2 = float: '1';
+
+a3 = float: 1;
+b3 = float: 1.1;
+c3 = float: TRUE; // aqui eh pra dar erro
+d3 = float: FALSE; // aqui eh pra dar erro
+e3 = float: '1';
+
+a4 = bool: 1; // aqui eh pra dar erro
+b4 = bool: 1.1; // aqui eh pra dar erro
+c4 = bool: TRUE; 
+d4 = bool: FALSE; 
+e4 = bool: '1'; // aqui eh pra dar erro
+
+d = float: '1';

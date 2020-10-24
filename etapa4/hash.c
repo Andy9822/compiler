@@ -63,7 +63,7 @@ void hashPrint() {
   for (i = 0; i < HASH_SIZE; i++) {
     node = HASH_TABLE[i];
     while (node) {
-      printf("Table [%d] has %s with type %d\n",i, node->text, node->type);
+      printf("Table [%d] has %s with type %d and datatype %d\n",i, node->text, node->type, node->data_type);
       node = node->next;
     }
   }

@@ -49,6 +49,12 @@ test-previous:
 	diff tests/ast-generation/output.txt tests/ast-generation/final.txt
 	rm tests/ast-generation/output.txt tests/ast-generation/final.txt  
 
+test-variables:
+	./etapa4 tests/semantic_verification/variables/basic_input.txt out.txt > tests/semantic_verification/variables/basic_result.txt    
+	diff tests/semantic_verification/variables/basic_expected.txt tests/semantic_verification/variables/basic_result.txt  
+
+test: test-variables
+
 tar:
 	tar cvzf $(ETAPA).tgz .
 	chmod 744 $(ETAPA).tgz
