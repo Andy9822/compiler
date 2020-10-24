@@ -110,6 +110,7 @@ void check_and_set_declarations(AST *node)
     switch (node->type)
     {
         case AST_VARDEC:
+        case AST_VEC_DEC:
             if (node->son[0]->son[0]->symbol->type != SYMBOL_IDENTIFIER)
             {
                 printf("Semantic Error: variable %s has already been declared\n", node->son[0]->son[0]->symbol->text);
@@ -119,14 +120,13 @@ void check_and_set_declarations(AST *node)
             node->son[0]->son[0]->symbol->data_type = getDatatypeFromSymbol(node->son[0]->son[1]->symbol->type);
             break;
 
-        case AST_VEC_DEC:
         case AST_VEC_INIT:
-            if (node->symbol->type != SYMBOL_IDENTIFIER)
+            if (node->son[0]->son[0]->symbol->type != SYMBOL_IDENTIFIER)
             {
                 printf("Semantic Error: function %s has already been declared\n", node->symbol->text);
                 ++SemanticErrors;
             }
-            node->symbol->type = SYMBOL_VECTOR;
+            node->son[0]->son[0]->symbol->type = SYMBOL_VECTOR;
             break;
 
         case AST_FUNC_VOID_DEC:
@@ -160,12 +160,42 @@ void validate_AST_VARDEC(AST * node)
 {
     int var_type = node->son[0]->son[0]->symbol->data_type;
     int literal_type = getDatatypeFromLiteral(node->son[1]->symbol->type);
-    if (! compatibleTypes(var_type, literal_type))
+    if (!compatibleTypes(var_type, literal_type))
     {
         printf("Semantic Error: variable %s has invalid type declaration\n", node->son[0]->son[0]->symbol->text);
         // printf("vartype : %d\n", var_type);
         // printf("literal_type %s = %d\n", node->son[1]->symbol->text, literal_type);
         SemanticErrors++;
+    }
+}
+
+void validate_AST_VEC_INIT(AST * node)
+{
+    // int var_type = node->son[0]->son[0]->symbol->data_type;
+    // printf("vetor de tipo: %d \n", var_type);
+    int var_type = getDatatypeFromSymbol(node->son[0]->son[1]->symbol->type);
+
+    int len = strtol(node->son[1]->symbol->text, NULL, 16);
+    int actual_len = 0;
+
+    AST * values_subtree = node->son[2];
+    while (values_subtree)
+    {
+        if (!compatibleTypes(var_type, getDatatypeFromLiteral(values_subtree->son[0]->symbol->type)))
+        {
+            SemanticErrors++;
+            printf("Semantic Error: invalid values type in vector %s initialization\n", node->son[0]->son[0]->symbol->text);
+            return;
+            break;
+        }
+        actual_len++;
+        values_subtree = values_subtree->son[1];
+    }
+
+    if (len != actual_len)
+    {
+        SemanticErrors++;
+        printf("Semantic Error: number of initialization values does not match len %d of vector %s\n", len, node->son[0]->son[0]->symbol->text);
     }
 }
 
@@ -180,14 +210,11 @@ void check_operands(AST* node)
             validate_AST_VARDEC(node);
             break;
 
-        // case AST_ADD:
-        //     // if (!(node->son[0]))
-        //     // {
-        //     //     printf("Semantic error: invalid left operand for ADD\n");
-        //     //     SemanticErrors++;
-        //     // }
-        //     printf("oi gostosa\n");
-        //     break;
+        case AST_VEC_INIT:
+            validate_AST_VEC_INIT(node);
+            break;
+
+    
     }
     for (i = 0; i < MAX_SONS; i++)
     {

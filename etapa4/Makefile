@@ -53,7 +53,11 @@ test-variables:
 	./etapa4 tests/semantic_verification/variables/basic_input.txt out.txt > tests/semantic_verification/variables/basic_result.txt    
 	diff tests/semantic_verification/variables/basic_expected.txt tests/semantic_verification/variables/basic_result.txt  
 
-test: test-variables
+test-vector_dec:
+	./etapa4 tests/semantic_verification/vector_dec/basic_input.txt out.txt > tests/semantic_verification/vector_dec/basic_result.txt    
+	diff tests/semantic_verification/vector_dec/basic_expected.txt tests/semantic_verification/vector_dec/basic_result.txt  
+
+test: test-variables test-vector_dec
 
 tar:
 	tar cvzf $(ETAPA).tgz .

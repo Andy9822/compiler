@@ -1,0 +1,22 @@
+a = char[4];
+b = int[1645];
+c = float[1];
+d = bool[12];
+
+
+ak = char[0A]: 69 4 4 'c' 2.0 2.B 5 'c' 2 8;
+bk = int[0A] : 69 4 4 'b' 2.0 2.B 5 'c' 2 8;
+ck = float[0A] : 69 4 4 'a' 2.0 2.B 5 'c' 2 8;
+dk = bool[5] : TRUE TRUE FALSE TRUE TRUE;
+
+ai = char[0A]: 69 4 4 'c' 2.0 2.B 5;
+bi = int[0A] : 69 4 4 'b' 2.0 2.B 5;
+ci = float[0A] : 69 4 4 'a' 2.0 2.B 5;
+di = bool[5] : TRUE;
+
+af = char[0A]: TRUE 4 4 'c' 2.0 2.B 5 'c' 2 8;
+bf = int[0A] : 69 4 FALSE 'b' 2.0 2.B 5 'c' 2 8;
+cf = float[0A] : 69 4 TRUE 'a' 2.0 2.B 5 'c' 2 8;
+df1 = bool[5] : 6.9 TRUE FALSE TRUE TRUE;
+df2 = bool[5] : 6 TRUE FALSE TRUE TRUE;
+df3 = bool[5] : '6' TRUE FALSE TRUE TRUE;
