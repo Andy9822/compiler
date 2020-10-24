@@ -98,7 +98,15 @@ int compatibleTypes(int var_type, int literal_type)
 
 int infer_type_AST_SYMBOL(AST * node)
 {
-    return getDatatypeFromLiteral(node->symbol->type);
+    if (node->symbol->type == SYMBOL_VARIABLE)
+    {
+        return node->symbol->data_type;
+    }
+
+    if (SYMBOL_LIT_INTEGER <= node->symbol->type && node->symbol->type <= SYMBOL_LIT_FALSE)
+    {
+        return getDatatypeFromLiteral(node->symbol->type);
+    }
 }
 
 int infer_type_AST_AST_PARENTHESIS(AST * node)

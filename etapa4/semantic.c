@@ -111,6 +111,9 @@ void validate_ATRIBUITION(AST * node)
     {
         int var_type = node->son[0]->symbol->data_type;
         int expression_type = infer_type(node->son[1]);
+        // printf("expression ast type : %d  \n", node->son[1]->type);
+        // printf("expression : %s  \n", node->son[1]->symbol->text);
+        // printf("expression symbol type : %d  \n", node->son[1]->symbol->type);
 
         if (!compatibleTypes(var_type, expression_type))
         {
