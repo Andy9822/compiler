@@ -75,6 +75,7 @@ AST *astPrint(AST *node, int level)
       case AST_READ: fprintf(stderr, "AST_READ"); break;
       case AST_ATRIBUITION: fprintf(stderr, "AST_ATRIBUITION"); break;
       case AST_ATRIBUITION_VEC: fprintf(stderr, "AST_ATRIBUITION_VEC"); break;
+      case AST_PARENTHESIS: fprintf(stderr, "AST_PARENTHESIS"); break;
       
       default: fprintf(stderr, "AST_UNDEFINED"); break;
    }

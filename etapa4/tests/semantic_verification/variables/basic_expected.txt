@@ -10,4 +10,4 @@ Semantic Error: variable d3 has invalid type declaration
 Semantic Error: variable a4 has invalid type declaration
 Semantic Error: variable b4 has invalid type declaration
 Semantic Error: variable e4 has invalid type declaration
-Compilation successfull! 
+Compilation ERROR! 
