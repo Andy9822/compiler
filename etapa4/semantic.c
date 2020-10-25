@@ -186,7 +186,7 @@ void validate_AST_ADD_like(AST * node)
 
     int left_type = infer_type(node->son[0]);
     int right_type = infer_type(node->son[1]);
-    
+
     if ( !isNumberType(left_type) || !isNumberType(right_type) )
     {
         SemanticErrors++;
@@ -238,13 +238,26 @@ void validate_AST_DIF_like(AST * node)
     check_operands(node->son[0], 1);
     check_operands(node->son[1], 1);
     int left_type = infer_type(node->son[0]);
-    int right_type = infer_type(node->son[1]);
+    int right_type = infer_type(node->son[1]);    
 }
 
 void validate_AST_PARENTHESIS(AST * node)
 {
     check_operands(node->son[0], 1);
     int expression_type = infer_type(node);
+}
+
+void validate_IF(AST * node)
+{
+    check_operands(node->son[0], 1);
+    int expression_type = infer_type(node->son[0]);
+
+    if (expression_type != DATATYPE_BOOL)
+    {
+        SemanticErrors++;
+        printf("Semantic Error: if clausule needs to be a boolean expression\n");
+    }
+    
 }
 
 void validate_AST_SYMBOL(AST * node)
@@ -317,6 +330,11 @@ void check_operands(AST* node, int flag)
 
         case AST_ATRIBUITION_VEC:
             validate_ATRIBUITION_VEC(node);
+            break;
+
+        case AST_IF:
+        case AST_IF_ELSE:
+            validate_IF(node);
             break;
     
     }

@@ -194,6 +194,13 @@ int infer_AST_NOT(AST * node)
     return DATATYPE_ERROR;
 }
 
+int infer_EQ_like(AST * node)
+{
+    int left_type = infer_type(node->son[0]);
+    int right_type = infer_type(node->son[1]);
+    return DATATYPE_BOOL;
+}
+
 int infer_type(AST * node)
 {
     // printf("entrei infer_type \n");
@@ -235,6 +242,12 @@ int infer_type(AST * node)
         case AST_VECTOR_ACCESS:
             infer_vector_access(node);
             break;
+            
+        case AST_DIF:
+        case AST_EQ:
+            return infer_EQ_like(node);
+            break;
+
         default:
             break;
     }

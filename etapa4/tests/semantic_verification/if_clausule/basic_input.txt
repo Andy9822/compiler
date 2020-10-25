@@ -1,0 +1,41 @@
+c = bool: TRUE;
+bv = bool[1]: FALSE;
+f = float: 5.A;
+i = int: 5;
+iv = int[10];
+fun () = int 
+{
+    
+    if (5 != 5) then 
+    if ( TRUE ) then {
+        i = 5
+        i = 5 * i /2 + iv[2] 
+    } else {
+        i = 0
+    }
+
+    if (f >= i) then {}
+    if (bv[0] ^ c) then {}
+    if (f <= i) then {if (TRUE) then else i = 5} else 
+    
+    if (i<10) then {} else {}
+    if (i<10) then {} else {}
+    if (((~a) ^ (b)) | c ) then {if (TRUE) then} else 
+    if (a) then {}
+    if (a == b) then {} else 
+    if (a != b) then {}
+    if (a ^ b) then {} else {}
+    if (a | b) then {}
+
+    if (~a) then {}
+    if (~a) then {}
+
+    if (f + i) then {} // eh pra dar erro
+    if (f - i) then {} // eh pra dar erro
+    if (f * i) then {} // eh pra dar erro
+    if (f / i) then {} // eh pra dar erro
+    if (0) then {} // eh pra dar erro
+};
+
+a = bool: FALSE;
+b = bool: TRUE;
