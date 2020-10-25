@@ -22,6 +22,4 @@ Semantic Error: invalid value type for bf1 atribuition
 Semantic Error: invalid value type for bf2 atribuition 
 Semantic Error: invalid value type for bf3 atribuition 
 Semantic Error: using identifier fun that's not variable neither literal
-Semantic Error: symbol fun with invalid type 
-Semantic Error: invalid value type for if5 atribuition 
 Compilation ERROR! 

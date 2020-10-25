@@ -98,7 +98,7 @@ int compatibleTypes(int var_type, int literal_type)
 
 int infer_type_AST_SYMBOL(AST * node)
 {
-    if (node->symbol->type == SYMBOL_VARIABLE || node->symbol->type == SYMBOL_VECTOR)
+    if (node->symbol->type == SYMBOL_VARIABLE || node->symbol->type == SYMBOL_VECTOR || node->symbol->type == SYMBOL_FUNCTION)
     {
         return node->symbol->data_type;
     }
@@ -186,6 +186,13 @@ int infer_EQ_like(AST * node)
     return DATATYPE_BOOL;
 }
 
+
+int infer_FUNC_CALL(AST * node)
+{
+    int identifier_datatype = infer_type(node->son[0]);
+    return identifier_datatype;
+}
+
 int infer_type(AST * node)
 {
     // printf("entrei infer_type \n");
@@ -231,6 +238,10 @@ int infer_type(AST * node)
         case AST_DIF:
         case AST_EQ:
             return infer_EQ_like(node);
+            break;
+
+        case AST_FUNC_CALL:
+            return infer_FUNC_CALL(node);
             break;
 
         default:

@@ -80,7 +80,11 @@ test-while_clausule:
 	./etapa4 tests/semantic_verification/while_clausule/basic_input.txt out.txt > tests/semantic_verification/while_clausule/basic_result.txt    
 	diff tests/semantic_verification/while_clausule/basic_expected.txt tests/semantic_verification/while_clausule/basic_result.txt  
 
-test: test-variables test-vector_dec test-arithm_bool_ops test-identifier_access test-atribuition_identifier_access test-if_clausule test-while_clausule
+test-func_void_call:
+	./etapa4 tests/semantic_verification/func_void_call/basic_input.txt out.txt > tests/semantic_verification/func_void_call/basic_result.txt    
+	diff tests/semantic_verification/func_void_call/basic_expected.txt tests/semantic_verification/func_void_call/basic_result.txt  
+
+test: test-variables test-vector_dec test-arithm_bool_ops test-identifier_access test-atribuition_identifier_access test-if_clausule test-while_clausule test-func_void_call
 
 tar:
 	tar cvzf $(ETAPA).tgz .

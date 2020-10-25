@@ -38,6 +38,15 @@ void check_and_set_declarations(AST *node)
 
         // TODO 
         case AST_FUNC_VOID_DEC:
+            if (node->son[0]->symbol->type != SYMBOL_IDENTIFIER)
+            {
+                printf("Semantic Error: function %s has already been declared\n", node->son[0]->symbol->text);
+                ++SemanticErrors;
+            }
+            node->son[0]->symbol->type = SYMBOL_FUNCTION;
+            node->son[0]->symbol->data_type = getDatatypeFromSymbol(node->son[1]->symbol->type);
+            break;
+
         case AST_FUNC_PARAMS_DEC:
             if (node->son[0]->symbol->type != SYMBOL_IDENTIFIER)
             {
@@ -45,11 +54,10 @@ void check_and_set_declarations(AST *node)
                 ++SemanticErrors;
             }
             node->son[0]->symbol->type = SYMBOL_FUNCTION;
-            node->son[0]->symbol->data_type = getDatatypeFromSymbol(node->son[1]->symbol->type);;
+            node->son[0]->symbol->data_type = getDatatypeFromSymbol(node->son[3]->symbol->type);
             break;
 
         default:
-            // printf("default aqui");
             break;
     }
 
@@ -283,6 +291,16 @@ void validate_IF_like(AST * node)
     
 }
 
+void validate_FUNC_CALL(AST * node)
+{
+    int identifier_type = node->son[0]->symbol->type;
+    if (identifier_type != SYMBOL_FUNCTION)
+    {
+        SemanticErrors++;
+        printf("Semantic Error: forbid to call identifier %s(), only allowed for functions\n", node->son[0]->symbol->text);
+    }
+}
+
 void validate_AST_SYMBOL(AST * node)
 {
     if (node->symbol->type != SYMBOL_VARIABLE && !isNumberType(getDatatypeFromLiteral(node->symbol->type)) && !isBoolType(getDatatypeFromLiteral(node->symbol->type)))
@@ -366,6 +384,14 @@ void check_operands(AST* node, int flag)
         case AST_IF_ELSE:
         case AST_WHILE:
             validate_IF_like(node);
+            break;
+
+        case AST_FUNC_CALL:
+            if (flag)
+            {
+                validate_FUNC_CALL(node);
+            }
+            
             break;
     
     }

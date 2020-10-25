@@ -9,6 +9,35 @@ unsigned long long int SemanticErrors;
 
 int yyparse();
 
+void check_argv(int argc, char **argv)
+{
+  if (argc == 4)
+  {
+    if (strcmp (argv[3], "-ast") == 0 ||  strcmp (argv[3], "-a") == 0)
+    {
+      astPrint(Root, 1);
+    }
+    if (strcmp (argv[3], "-hash") == 0 || strcmp (argv[3], "-h") == 0 )
+    {
+      hashPrint();
+    }
+  }
+
+  if (argc == 5)
+  {
+    if (strcmp (argv[3], "-ast") == 0 ||  strcmp (argv[3], "-a") == 0
+        || strcmp (argv[4], "-ast") == 0 ||  strcmp (argv[4], "-a") == 0)
+    {
+      astPrint(Root, 1);
+    }
+    if (strcmp (argv[3], "-hash") == 0 || strcmp (argv[3], "-h") == 0
+        || strcmp (argv[4], "-hash") == 0 || strcmp (argv[4], "-h") == 0)
+    {
+      hashPrint();
+    }
+  }
+}
+
 int main(int argc, char **argv) {
 
   if (argc < 3) {
@@ -30,13 +59,15 @@ int main(int argc, char **argv) {
   hash_init();
   yyparse();
   // decompile(Root, fp);
-  // hashPrint();
-  // astPrint(Root, 1);
+
+  check_argv(argc, argv);
+
   if (SemanticErrors)
   {
     printf("Compilation ERROR! \n");
     // return 4;
   }
+
   else 
   {
     printf("Compilation successfull! \n");
