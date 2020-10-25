@@ -5,13 +5,9 @@ Semantic Error: invalid index type for vector v7f atribuition
 Semantic Error: invalid value type for v8f atribuition 
 Semantic Error: invalid value type for vb1f atribuition 
 Semantic Error: using invalid type as index for acccessing v9f 
-Semantic Error: invalid value type for if1 atribuition 
 Semantic Error: using invalid type as index for acccessing v10f 
-Semantic Error: invalid value type for if2 atribuition 
 Semantic Error: using invalid type as index for acccessing v11f 
-Semantic Error: invalid value type for if1 atribuition 
 Semantic Error: using invalid type as index for acccessing v12f 
-Semantic Error: invalid value type for if2 atribuition 
 Semantic Error: invalid value type for if3 atribuition 
 Semantic Error: invalid value type for vf1f atribuition 
 Semantic Error: invalid value type for vc1f atribuition 

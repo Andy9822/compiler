@@ -241,6 +241,29 @@ void validate_AST_DIF_like(AST * node)
     int right_type = infer_type(node->son[1]);    
 }
 
+void validate_VECTOR_ACCESS(AST * node)
+{
+    int identifier_type = node->son[0]->symbol->type;
+    if (identifier_type != SYMBOL_VECTOR)
+    {
+        printf("Semantic Error: forbidden access to %s with index, only allowed for vectors \n", node->son[0]->symbol->text);
+        SemanticErrors++;
+        return;
+    }
+    
+    int vector_type = infer_type(node->son[0]);
+    int index_type = infer_type(node->son[1]);
+
+    
+    if (index_type == DATATYPE_CHAR || index_type == DATATYPE_INT)
+    {
+        return;
+    }
+    
+    printf("Semantic Error: using invalid type as index for acccessing %s \n", node->son[0]->symbol->text);
+    SemanticErrors++;
+}
+
 void validate_AST_PARENTHESIS(AST * node)
 {
     check_operands(node->son[0], 1);
@@ -332,6 +355,13 @@ void check_operands(AST* node, int flag)
             validate_ATRIBUITION_VEC(node);
             break;
 
+        case AST_VECTOR_ACCESS:
+            if (flag)
+            {
+                validate_VECTOR_ACCESS(node);
+            }
+            
+            break;
         case AST_IF:
         case AST_IF_ELSE:
         case AST_WHILE:

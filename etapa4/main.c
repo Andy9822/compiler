@@ -35,6 +35,7 @@ int main(int argc, char **argv) {
   if (SemanticErrors)
   {
     printf("Compilation ERROR! \n");
+    // return 4;
   }
   else 
   {

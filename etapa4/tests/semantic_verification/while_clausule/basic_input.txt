@@ -30,8 +30,8 @@ fun () = int
     while (~a)  { i = iv[0]}
 
     while (f + i)  {} // eh pra dar erro
-    while (f[1] - i)  {} // eh pra dar erro
-    while (f * iv[2])  {} // eh pra dar erro
+    while (f - i)  {} // eh pra dar erro
+    while (f[1] * iv[2])  {} // eh pra dar erro
     while (f / i)  {} // eh pra dar erro
     while (0) {} // eh pra dar erro
 };

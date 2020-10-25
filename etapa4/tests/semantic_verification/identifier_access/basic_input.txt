@@ -47,4 +47,5 @@ fun () = int
     v3f = 2 + 1
     fun = 2 + 1
     fun[TRUE] = 2 + 1
+    i1 = f1[0]
 };

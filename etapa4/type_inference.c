@@ -118,25 +118,10 @@ int infer_type_AST_AST_PARENTHESIS(AST * node)
     return infer_type(node->son[0]);
 }
 
-int infer_type_AST_VECTOR(AST * node)
-{
-    printf("sla to aqui \n");
-    // return infer_type(node->son);
-}
-
 int infer_vector_access(AST * node)
 {
     int vector_type = infer_type(node->son[0]);
-    int index_type = infer_type(node->son[1]);
-    
-    if (index_type == DATATYPE_CHAR || index_type == DATATYPE_INT)
-    {
-        return vector_type;
-    }
-    
-    printf("Semantic Error: using invalid type as index for acccessing %s \n", node->son[0]->symbol->text);
-    SemanticErrors++;
-    return DATATYPE_ERROR;
+    return vector_type;
 }
 
 int infer_AST_GREATER_like(AST * node)
