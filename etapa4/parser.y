@@ -85,7 +85,7 @@ int yyerror();
 
 %%
 
-programa: declist {$$ = $1; Root = $$; check_and_set_declarations(Root); check_undeclared(); check_operands(Root); /*astPrint($1, 0);*/}
+programa: declist {$$ = $1; Root = $$; check_and_set_declarations(Root); check_undeclared(); check_operands(Root, 0); /*astPrint($1, 0);*/}
     ;
 
 declist: vardec ';' declist {$$ = astCreate( AST_DECLIST, NULL, $1, $3, NULL, NULL, NULL); /*astPrint($1, 0);*/}

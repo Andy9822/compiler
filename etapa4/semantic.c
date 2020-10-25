@@ -1,5 +1,6 @@
 #include "semantic.h"
 #include "hash.h"
+#include "ast.h"
 
 unsigned long long int SemanticErrors = 0;
 
@@ -10,6 +11,7 @@ void check_and_set_declarations(AST *node)
     {
         return;
     }
+
 
     switch (node->type)
     {
@@ -24,15 +26,17 @@ void check_and_set_declarations(AST *node)
             break;
 
         case AST_VEC_INIT:
+        case AST_VEC_DEC:
             if (node->son[0]->son[0]->symbol->type != SYMBOL_IDENTIFIER)
             {
-                printf("Semantic Error: function %s has already been declared\n", node->symbol->text);
+                printf("Semantic Error: variable %s has already been declared\n", node->son[0]->son[0]->symbol->text);
                 ++SemanticErrors;
             }
-        case AST_VEC_DEC:
             node->son[0]->son[0]->symbol->type = SYMBOL_VECTOR;
+            node->son[0]->son[0]->symbol->data_type = getDatatypeFromSymbol(node->son[0]->son[1]->symbol->type);
             break;
 
+        // TODO 
         case AST_FUNC_VOID_DEC:
         case AST_FUNC_PARAMS_DEC:
             if (node->son[0]->symbol->type != SYMBOL_IDENTIFIER)
@@ -109,6 +113,8 @@ void validate_ATRIBUITION(AST * node)
 
     if (var_symbol_type == SYMBOL_VARIABLE)
     {
+        // Check expression
+        check_operands(node->son[1], 1);
         int var_type = node->son[0]->symbol->data_type;
         int expression_type = infer_type(node->son[1]);
         // printf("expression ast type : %d  \n", node->son[1]->type);
@@ -134,8 +140,50 @@ void validate_ATRIBUITION(AST * node)
     }
 }
 
+void validate_ATRIBUITION_VEC(AST * node)
+{
+    int var_symbol_type = node->son[0]->symbol->type;
+
+    if (var_symbol_type == SYMBOL_VECTOR)
+    {
+        check_operands(node->son[1], 1);
+        check_operands(node->son[2], 1);
+
+        int var_type = node->son[0]->symbol->data_type;
+        int index_type = infer_type(node->son[1]);
+        int expression_type = infer_type(node->son[2]);
+
+        if (index_type != DATATYPE_CHAR && index_type != DATATYPE_INT)
+        {
+            SemanticErrors++;
+            printf("Semantic Error: invalid index type for vector %s atribuition \n", node->son[0]->symbol->text);
+        }
+        
+        else if (!compatibleTypes(var_type, expression_type))
+        {
+            SemanticErrors++;
+            printf("Semantic Error: invalid value type for %s atribuition \n", node->son[0]->symbol->text); 
+        }
+    }
+
+    else if (var_symbol_type == SYMBOL_VARIABLE)
+    {
+        SemanticErrors++;
+        printf("Semantic Error: variable %s can't be accessed as a vector \n", node->son[0]->symbol->text);
+    }
+
+    else 
+    {
+        SemanticErrors++;
+        printf("Semantic Error: identifier %s does not belong to a vector \n", node->son[0]->symbol->text);
+    }
+}
+
 void validate_AST_ADD_like(AST * node)
 {
+    check_operands(node->son[0], 1);
+    check_operands(node->son[1], 1);
+
     int left_type = infer_type(node->son[0]);
     int right_type = infer_type(node->son[1]);
     
@@ -148,6 +196,9 @@ void validate_AST_ADD_like(AST * node)
 
 void validate_AST_OR_like(AST * node)
 {
+    check_operands(node->son[0], 1);
+    check_operands(node->son[1], 1);
+
     int left_type = infer_type(node->son[0]);
     int right_type = infer_type(node->son[1]);
     
@@ -160,6 +211,7 @@ void validate_AST_OR_like(AST * node)
 
 void validate_AST_NOT(AST * node)
 {
+    check_operands(node->son[0], 1);
     int expression_type = infer_type(node->son[0]);
     
     if ( !isBoolType(expression_type))
@@ -171,6 +223,7 @@ void validate_AST_NOT(AST * node)
 
 void validate_AST_MINUS(AST * node)
 {
+    check_operands(node->son[0], 1);
     int expression_type = infer_type(node->son[0]);
     
     if ( !isNumberType(expression_type))
@@ -182,22 +235,41 @@ void validate_AST_MINUS(AST * node)
 
 void validate_AST_DIF_like(AST * node)
 {
+    check_operands(node->son[0], 1);
+    check_operands(node->son[1], 1);
     int left_type = infer_type(node->son[0]);
     int right_type = infer_type(node->son[1]);
 }
 
 void validate_AST_PARENTHESIS(AST * node)
 {
+    check_operands(node->son[0], 1);
     int expression_type = infer_type(node);
 }
 
-void check_operands(AST* node)
+void validate_AST_SYMBOL(AST * node)
+{
+    if (node->symbol->type != SYMBOL_VARIABLE && !isNumberType(getDatatypeFromLiteral(node->symbol->type)) && !isBoolType(getDatatypeFromLiteral(node->symbol->type)))
+    {
+        SemanticErrors++;
+        printf("Semantic Error: using identifier %s that's not variable neither literal\n", node->symbol->text);
+    }
+}
+
+void check_operands(AST* node, int flag)
 {
     int i;
     if (node == 0) return;
 
     switch (node->type)
     {
+        case AST_SYMBOL:
+            if (flag)
+            {
+                validate_AST_SYMBOL(node);
+            }
+            break;
+            
         case AST_VARDEC:
             validate_AST_VARDEC(node);
             break;
@@ -242,10 +314,14 @@ void check_operands(AST* node)
         case AST_ATRIBUITION:
             validate_ATRIBUITION(node);
             break;
+
+        case AST_ATRIBUITION_VEC:
+            validate_ATRIBUITION_VEC(node);
+            break;
     
     }
     for (i = 0; i < MAX_SONS; i++)
     {
-        check_operands(node->son[i]);
+        check_operands(node->son[i], 0);
     }
 }

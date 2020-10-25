@@ -64,7 +64,15 @@ test-arithm_bool_ops:
 	./etapa4 tests/semantic_verification/arithmetic_boolean_operations/basic_input.txt out.txt > tests/semantic_verification/arithmetic_boolean_operations/basic_result.txt    
 	diff tests/semantic_verification/arithmetic_boolean_operations/basic_expected.txt tests/semantic_verification/arithmetic_boolean_operations/basic_result.txt  
 
-test: test-variables test-vector_dec test-arithm_bool_ops
+test-identifier_access:
+	./etapa4 tests/semantic_verification/identifier_access/basic_input.txt out.txt > tests/semantic_verification/identifier_access/basic_result.txt    
+	diff tests/semantic_verification/identifier_access/basic_expected.txt tests/semantic_verification/identifier_access/basic_result.txt  
+
+test-atribuition_identifier_access:
+	./etapa4 tests/semantic_verification/atribuition_identifier_access/basic_input.txt out.txt > tests/semantic_verification/atribuition_identifier_access/basic_result.txt    
+	diff tests/semantic_verification/atribuition_identifier_access/basic_expected.txt tests/semantic_verification/atribuition_identifier_access/basic_result.txt  
+
+test: test-variables test-vector_dec test-arithm_bool_ops test-identifier_access test-atribuition_identifier_access
 
 tar:
 	tar cvzf $(ETAPA).tgz .

@@ -1,0 +1,31 @@
+Semantic Error: invalid index type for vector v4f atribuition 
+Semantic Error: invalid index type for vector v5f atribuition 
+Semantic Error: invalid index type for vector v6f atribuition 
+Semantic Error: invalid index type for vector v7f atribuition 
+Semantic Error: invalid value type for v8f atribuition 
+Semantic Error: invalid value type for vb1f atribuition 
+Semantic Error: using invalid type as index for acccessing v9f 
+Semantic Error: invalid value type for if1 atribuition 
+Semantic Error: using invalid type as index for acccessing v10f 
+Semantic Error: invalid value type for if2 atribuition 
+Semantic Error: using invalid type as index for acccessing v11f 
+Semantic Error: invalid value type for if1 atribuition 
+Semantic Error: using invalid type as index for acccessing v12f 
+Semantic Error: invalid value type for if2 atribuition 
+Semantic Error: invalid value type for if3 atribuition 
+Semantic Error: invalid value type for vf1f atribuition 
+Semantic Error: invalid value type for vc1f atribuition 
+Semantic Error: invalid value type for v13f atribuition 
+Semantic Error: invalid value type for vb1f atribuition 
+Semantic Error: invalid value type for vb2f atribuition 
+Semantic Error: invalid value type for vb3f atribuition 
+Semantic Error: invalid value type for if4 atribuition 
+Semantic Error: invalid value type for ff1 atribuition 
+Semantic Error: invalid value type for cf1 atribuition 
+Semantic Error: invalid value type for bf1 atribuition 
+Semantic Error: invalid value type for bf2 atribuition 
+Semantic Error: invalid value type for bf3 atribuition 
+Semantic Error: using identifier fun that's not variable neither literal
+Semantic Error: symbol fun with invalid type 
+Semantic Error: invalid value type for if5 atribuition 
+Compilation ERROR! 

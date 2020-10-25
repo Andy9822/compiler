@@ -11,4 +11,4 @@ unsigned long long int SemanticErrors;
 
 void check_and_set_declarations(AST* node);
 void check_undeclared();
-void check_operands(AST* node);
+void check_operands(AST* node, int flag);

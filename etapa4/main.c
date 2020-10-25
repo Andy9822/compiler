@@ -30,8 +30,8 @@ int main(int argc, char **argv) {
   hash_init();
   yyparse();
   // decompile(Root, fp);
-  // astPrint(Root, 1);
   // hashPrint();
+  // astPrint(Root, 1);
   if (SemanticErrors)
   {
     printf("Compilation ERROR! \n");

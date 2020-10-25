@@ -98,7 +98,7 @@ int compatibleTypes(int var_type, int literal_type)
 
 int infer_type_AST_SYMBOL(AST * node)
 {
-    if (node->symbol->type == SYMBOL_VARIABLE)
+    if (node->symbol->type == SYMBOL_VARIABLE || node->symbol->type == SYMBOL_VECTOR)
     {
         return node->symbol->data_type;
     }
@@ -107,11 +107,36 @@ int infer_type_AST_SYMBOL(AST * node)
     {
         return getDatatypeFromLiteral(node->symbol->type);
     }
+
+    printf("Semantic Error: symbol %s with invalid type \n", node->symbol->text);
+    SemanticErrors++;
+    return DATATYPE_ERROR;
 }
 
 int infer_type_AST_AST_PARENTHESIS(AST * node)
 {
     return infer_type(node->son[0]);
+}
+
+int infer_type_AST_VECTOR(AST * node)
+{
+    printf("sla to aqui \n");
+    // return infer_type(node->son);
+}
+
+int infer_vector_access(AST * node)
+{
+    int vector_type = infer_type(node->son[0]);
+    int index_type = infer_type(node->son[1]);
+    
+    if (index_type == DATATYPE_CHAR || index_type == DATATYPE_INT)
+    {
+        return vector_type;
+    }
+    
+    printf("Semantic Error: using invalid type as index for acccessing %s \n", node->son[0]->symbol->text);
+    SemanticErrors++;
+    return DATATYPE_ERROR;
 }
 
 int infer_AST_GREATER_like(AST * node)
@@ -124,7 +149,7 @@ int infer_AST_GREATER_like(AST * node)
         return DATATYPE_BOOL;
     }
      
-        SemanticErrors++;
+    SemanticErrors++;
     return DATATYPE_ERROR;
 }
 
@@ -139,7 +164,7 @@ int infer_type_ADD_like(AST * node)
         return greaterType;
     }
      
-        SemanticErrors++;
+    SemanticErrors++;
     return DATATYPE_ERROR;
 }
 
@@ -160,7 +185,6 @@ int infer_AST_OR_like(AST * node)
 int infer_AST_NOT(AST * node)
 {
     int expression_type = infer_type(node->son[0]);
-    
     if (isBoolType(expression_type))
     {
         return DATATYPE_BOOL;
@@ -172,40 +196,46 @@ int infer_AST_NOT(AST * node)
 
 int infer_type(AST * node)
 {
+    // printf("entrei infer_type \n");
+    // printf("to aqui guirzada com type = %d \n", node->type);
     switch (node->type)
     {
-    case AST_SYMBOL:
-        return infer_type_AST_SYMBOL(node);
-        break;
+        case AST_SYMBOL:
+            return infer_type_AST_SYMBOL(node);
+            break;
 
-    case AST_PARENTHESIS:
-        return infer_type_AST_AST_PARENTHESIS(node);
-        break;
-    
-    case AST_ADD:
-    case AST_SUB:
-    case AST_DIV:
-    case AST_MULT:
-        return infer_type_ADD_like(node);
-        break;
+        case AST_PARENTHESIS:
+            return infer_type_AST_AST_PARENTHESIS(node);
+            break;
+        
+        case AST_ADD:
+        case AST_SUB:
+        case AST_DIV:
+        case AST_MULT:
+            return infer_type_ADD_like(node);
+            break;
 
-    case AST_OR:
-    case AST_AND:
-        infer_AST_OR_like(node);
-        break;
+        case AST_OR:
+        case AST_AND:
+            infer_AST_OR_like(node);
+            break;
 
-    
-    case AST_GREATER:
-    case AST_LESSER:
-    case AST_GE:
-    case AST_LE:
-        infer_AST_GREATER_like(node);
-        break;
+        
+        case AST_GREATER:
+        case AST_LESSER:
+        case AST_GE:
+        case AST_LE:
+            infer_AST_GREATER_like(node);
+            break;
 
-    case AST_NOT:
-        infer_AST_NOT(node);
+        case AST_NOT:
+            infer_AST_NOT(node);
+            break;
 
-    default:
-        break;
+        case AST_VECTOR_ACCESS:
+            infer_vector_access(node);
+            break;
+        default:
+            break;
     }
 }
