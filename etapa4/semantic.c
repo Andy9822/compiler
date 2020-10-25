@@ -247,7 +247,7 @@ void validate_AST_PARENTHESIS(AST * node)
     int expression_type = infer_type(node);
 }
 
-void validate_IF(AST * node)
+void validate_IF_like(AST * node)
 {
     check_operands(node->son[0], 1);
     int expression_type = infer_type(node->son[0]);
@@ -334,7 +334,8 @@ void check_operands(AST* node, int flag)
 
         case AST_IF:
         case AST_IF_ELSE:
-            validate_IF(node);
+        case AST_WHILE:
+            validate_IF_like(node);
             break;
     
     }
