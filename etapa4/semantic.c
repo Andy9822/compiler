@@ -4,6 +4,23 @@
 
 unsigned long long int SemanticErrors = 0;
 
+void process_local_variable(AST * param_node, AST * func_node)
+{
+    //Set parameter identifier as local_variable
+    if (param_node->son[0]->symbol->type == SYMBOL_LOCAL_VARIABLE)
+    {
+        printf("Semantic Error: local variable %s has already been declared in other function\n", param_node->son[0]->symbol->text);
+        ++SemanticErrors;
+    }
+    
+    param_node->son[0]->symbol->type = SYMBOL_LOCAL_VARIABLE;
+
+    // Save identifier in function's scope variables list
+    char* var_name = param_node->son[0]->symbol->text;
+    int var_type = param_node->son[1]->symbol->type;
+    insert_local_variable(func_node->symbol, var_name, var_type);
+}
+
 void check_and_set_declarations(AST *node)
 {
     int i;
@@ -13,6 +30,8 @@ void check_and_set_declarations(AST *node)
     }
 
 
+    // printf("entrei check and set declarations \n");
+    // printf("type %d \n", node->type);
     switch (node->type)
     {
         case AST_VARDEC:
@@ -21,6 +40,7 @@ void check_and_set_declarations(AST *node)
                 printf("Semantic Error: variable %s has already been declared\n", node->son[0]->son[0]->symbol->text);
                 ++SemanticErrors;
             }
+            
             node->son[0]->son[0]->symbol->type = SYMBOL_VARIABLE;
             node->son[0]->son[0]->symbol->data_type = getDatatypeFromSymbol(node->son[0]->son[1]->symbol->type);
             break;
@@ -36,7 +56,7 @@ void check_and_set_declarations(AST *node)
             node->son[0]->son[0]->symbol->data_type = getDatatypeFromSymbol(node->son[0]->son[1]->symbol->type);
             break;
 
-        // TODO 
+
         case AST_FUNC_VOID_DEC:
             if (node->son[0]->symbol->type != SYMBOL_IDENTIFIER)
             {
@@ -47,12 +67,29 @@ void check_and_set_declarations(AST *node)
             node->son[0]->symbol->data_type = getDatatypeFromSymbol(node->son[1]->symbol->type);
             break;
 
-        case AST_FUNC_PARAMS_DEC:
+        case AST_FUNC_PARAMS_DEC:;
+            AST * func_node = node->son[0];
+            char* func_name = func_node->symbol->text;
+
             if (node->son[0]->symbol->type != SYMBOL_IDENTIFIER)
             {
-                printf("Semantic Error: function %s has already been declared\n", node->son[0]->symbol->text);
+                printf("Semantic Error: function %s has already been declared\n", func_name);
                 ++SemanticErrors;
             }
+
+            AST * parameter_node = node->son[1];
+            AST * parameter_list_node = node->son[2];
+            process_local_variable(parameter_node, func_node);
+            while (parameter_list_node)
+            {
+                parameter_node = parameter_list_node->son[0];
+                process_local_variable(parameter_node, func_node);
+                parameter_list_node = parameter_list_node->son[1];
+
+            }
+            // printf("Função %s tem: \n", func_name);
+            // print_scope_variables(func_node->symbol);
+            // printf("Função %s eh do tipo: \n", getDatatypeFromSymbol(node->son[3]->symbol->type));
             node->son[0]->symbol->type = SYMBOL_FUNCTION;
             node->son[0]->symbol->data_type = getDatatypeFromSymbol(node->son[3]->symbol->type);
             break;
@@ -299,11 +336,126 @@ void validate_FUNC_CALL(AST * node)
         SemanticErrors++;
         printf("Semantic Error: forbid to call identifier %s(), only allowed for functions\n", node->son[0]->symbol->text);
     }
+    
+    else if (node->son[0]->symbol->scope_variables != NULL)
+    {
+        SemanticErrors++;
+        printf("Semantic Error: function %s expects arguments\n", node->son[0]->symbol->text);
+    }
+    
+}
+void validate_FUNC_PARAMETERS_CALL(AST * node)
+{
+    int identifier_type = node->son[0]->symbol->type;
+    if (identifier_type != SYMBOL_FUNCTION)
+    {
+        SemanticErrors++;
+        printf("Semantic Error: forbid to call identifier %s(...), only allowed for functions\n", node->son[0]->symbol->text);
+        return;
+    }
+    AST * func_node = node->son[0];
+
+    if (func_node->symbol->scope_variables == 0)
+    {
+        SemanticErrors++;
+        printf("Semantic Error: function %s() doesn't expect any parameter\n", node->son[0]->symbol->text);
+        return;
+    }
+
+    char* func_name = node->son[0]->symbol->text;
+    // printf("validando %s \n", func_name);
+    
+    // printf("func name %s \n", func_node->symbol->text);
+    
+    int expected_len = get_scope_len(func_node->symbol); 
+    // printf("expected_len : %d\n", expected_len);
+
+    int avaliated_params = 0;
+    check_operands(node->son[1], 1);
+    int param_type = infer_type(node->son[1]);
+    int expected_param_type = getDatatypeFromSymbol(get_scope_index(func_node->symbol, 0));
+    // printf("expected first param type %d \n", expected_param_type);
+    // printf("first param type %d \n", param_type);
+
+    if (!compatibleTypes(param_type, expected_param_type))
+    {
+        SemanticErrors++;
+        printf("Semantic Error: function %s receiving invalid parameter\n", func_name);
+        return;
+    }
+    avaliated_params+=1;
+
+    AST * params_list_node = node->son[2];
+    if (avaliated_params == expected_len)
+    {
+        if (params_list_node == NULL)
+        {
+            return;
+        }
+
+        else
+        {
+            SemanticErrors++;
+            printf("Semantic Error: function %s receiving more parameters than expected\n", func_name);
+            return;
+        }
+    }
+
+    if (params_list_node == NULL)
+    {
+        SemanticErrors++;
+        printf("Semantic Error: function %s receiving less parameters than expected\n", func_name);
+        return;
+    }
+    
+    while (1)
+    {
+        // printf("ast type %d \n", params_list_node->type);
+        expected_param_type = getDatatypeFromSymbol(get_scope_index(func_node->symbol, avaliated_params));
+        param_type = infer_type(params_list_node->son[0]);
+        check_operands(params_list_node->son[0], 1);
+        // printf("expected param %d has type %d \n", avaliated_params+1, expected_param_type);
+        // printf("%d parameter %s has type %d \n", avaliated_params+1, params_list_node->son[0]->symbol->text, param_type);
+        
+        if (!compatibleTypes(param_type, expected_param_type))
+        {
+            SemanticErrors++;
+            printf("Semantic Error: function %s receiving invalid parameter type\n", func_name);
+            return;
+        }
+
+        avaliated_params+=1;
+        if (avaliated_params == expected_len)
+        {
+            break;
+        }
+        
+        params_list_node = params_list_node->son[1];
+        
+        if (params_list_node == NULL)
+        {
+            SemanticErrors++;
+            printf("Semantic Error: function %s receiving less parameters than expected\n", func_name);
+            return;
+        }
+        
+    }
+    
+    if (params_list_node->son[1] != NULL)
+    {
+        SemanticErrors++;
+        printf("Semantic Error: function %s receiving more parameters than expected\n", func_name);
+        return;
+    }
+
 }
 
 void validate_AST_SYMBOL(AST * node)
 {
-    if (node->symbol->type != SYMBOL_VARIABLE && !isNumberType(getDatatypeFromLiteral(node->symbol->type)) && !isBoolType(getDatatypeFromLiteral(node->symbol->type)))
+    if (node->symbol->type != SYMBOL_VARIABLE
+     && !isNumberType(getDatatypeFromLiteral(node->symbol->type)) 
+     && !isBoolType(getDatatypeFromLiteral(node->symbol->type))
+     )
     {
         SemanticErrors++;
         printf("Semantic Error: using identifier %s that's not variable neither literal\n", node->symbol->text);
@@ -392,6 +544,13 @@ void check_operands(AST* node, int flag)
                 validate_FUNC_CALL(node);
             }
             
+            break;
+        
+        case AST_FUNC_PARAMS_CALL:
+            if (flag)
+            {
+                validate_FUNC_PARAMETERS_CALL(node);
+            }
             break;
     
     }

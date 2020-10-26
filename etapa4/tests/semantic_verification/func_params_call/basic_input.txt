@@ -1,0 +1,80 @@
+a = char: 5;
+i = int: 5;
+f = float: 5;
+c = char: 5;
+b = bool: TRUE;
+
+vecc = char[1];
+veci = int[1];
+vecf = float[1];
+vecb = bool[1];
+
+myfunc (x = float, y = int, z = float, w = bool) = char 
+{
+    a = myfunc(a, f, c, c)
+    a = 2 + myfunc(a + 2 - 'c' * c, f * 2.A, a/a, vecc[0] - myOtherfunc())
+    b = foop(TRUE) != myOtherfunc()
+    b = foop(foo()) != myOtherfunc()
+
+    c = myOtherfunc() * myOtherfunc()
+    b = foo() ^ (myOtherfunc() > 5)
+    b = fooF(foop(foo()),myfunc(a, f, c, a))
+    
+    a = myfuncLess(a, f, c) // ERRO: menos parametros
+    a = myfuncMore(a, f, c,a, a) // ERRO: mais parametros
+
+    a = myfuncWrongTypeParm(b, f, 5 > 5, c, a) // ERRO: parametros tipo errado
+    a = myfuncWrongTypeParm2(foo(), f) // ERRO: parametros tipo errado
+    
+    a = fooF(fooF(foop(foo()),myfuncLess(a, f, c, a)), f) // ERRO: parametros tipo errado e erro geral
+
+    a = foopMore(TRUE, 5) // ERRO: received more than expected
+    a = foop() // ERRO: expects arguments
+    a = foo1less(TRUE) // ERRO: expects more arguments
+
+};
+
+myfuncLess (x12 = float, y1 = int, z1 = float, w1 = bool) = char 
+{
+};
+
+myfuncWrongTypeParm (x2222222222 = float, y222222222 = int, z2 = float, w2 = bool) = char 
+{
+};
+
+myfuncWrongTypeParm2 (x22222 = float, y22222 = int) = char 
+{
+};
+
+myfuncWrongTypeParm3 (x22 = float, y22222222 = int) = char 
+{
+};
+
+myfuncMore (x222 = float, y22 = int, z22 = float, w22 = bool) = char 
+{
+};
+
+myOtherfunc () = char 
+{
+};
+
+foo () = bool 
+{
+};
+
+foop (x1 = bool) = int 
+{
+};
+
+foopMore (x1111 = bool) = int 
+{
+};
+
+foo1less (xx1 = bool, xxx1 = bool) = int 
+{
+};
+
+fooF(x44 = float, y4 = int) =  bool
+{
+
+};

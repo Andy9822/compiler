@@ -241,6 +241,7 @@ int infer_type(AST * node)
             break;
 
         case AST_FUNC_CALL:
+        case AST_FUNC_PARAMS_CALL:
             return infer_FUNC_CALL(node);
             break;
 
