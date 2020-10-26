@@ -22,6 +22,7 @@
 #define SYMBOL_VECTOR 13
 #define SYMBOL_FUNCTION 14
 #define SYMBOL_LOCAL_VARIABLE 15
+#define SYMBOL_USED_LOCAL_VARIABLE 16
 
 enum
 {
@@ -58,4 +59,5 @@ void insert_local_variable(HASH_NODE* node, char* local_variable_name, int local
 void print_scope_variables(HASH_NODE* node);
 int get_scope_len(HASH_NODE* node);
 int get_scope_index(HASH_NODE* node, int idx);
+char* get_scope_var_name_at_index(HASH_NODE* node, int idx);
 #endif

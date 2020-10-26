@@ -92,7 +92,15 @@ test-func_params_call:
 	./etapa4 tests/semantic_verification/func_params_call/basic_input.txt out.txt > tests/semantic_verification/func_params_call/basic_result.txt    
 	diff tests/semantic_verification/func_params_call/basic_expected.txt tests/semantic_verification/func_params_call/basic_result.txt  
 
-test: test-variables test-vector_dec test-arithm_bool_ops test-identifier_access test-atribuition_identifier_access test-if_clausule test-while_clausule test-func_void_call test-local_parameters_repetition_func test-func_params_call
+test-local_variables:
+	./etapa4 tests/semantic_verification/local_variables/basic_input.txt out.txt > tests/semantic_verification/local_variables/basic_result.txt    
+	diff tests/semantic_verification/local_variables/basic_expected.txt tests/semantic_verification/local_variables/basic_result.txt  
+
+test-func_types_compatibility:
+	./etapa4 tests/semantic_verification/func_types_compatibility/basic_input.txt out.txt > tests/semantic_verification/func_types_compatibility/basic_result.txt    
+	diff tests/semantic_verification/func_types_compatibility/basic_expected.txt tests/semantic_verification/func_types_compatibility/basic_result.txt  
+
+test: test-variables test-vector_dec test-arithm_bool_ops test-identifier_access test-atribuition_identifier_access test-if_clausule test-while_clausule test-func_void_call test-local_parameters_repetition_func test-func_params_call test-local_variables test-func_types_compatibility
 
 tar:
 	tar cvzf $(ETAPA).tgz .

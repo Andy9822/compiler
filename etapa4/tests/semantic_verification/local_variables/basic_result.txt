@@ -1,0 +1,17 @@
+Semantic Error: parameter w2 has already been declared as variable
+Semantic Error: variable zeta has already been declared
+Semantic Error: parameter zeta already declared as a variable
+Semantic Error: using identifier x that's not variable neither literal
+Semantic Error: symbol x with invalid type 
+Semantic Error: invalid value type for a atribuition 
+Semantic Error: using identifier y that's not variable neither literal
+Semantic Error: symbol y with invalid type 
+Semantic Error: invalid value type for a atribuition 
+Semantic Error: using identifier z that's not variable neither literal
+Semantic Error: symbol z with invalid type 
+Semantic Error: invalid value type for a atribuition 
+Semantic Error: using identifier w that's not variable neither literal
+Semantic Error: symbol w with invalid type 
+Semantic Error: invalid value type for a atribuition 
+Semantic Error: variable zeta has invalid type declaration
+Compilation ERROR! 

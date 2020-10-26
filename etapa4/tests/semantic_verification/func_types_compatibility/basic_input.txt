@@ -1,0 +1,91 @@
+a = char: 5;
+i = int: 5;
+f = float: 5;
+c = char: 5;
+b = bool: TRUE;
+
+a_fail = int: 5;
+i_fail = int: 5;
+f_fail = float: 5;
+c_fail = char: 5;
+b_fail0 = bool: TRUE;
+b_fail1 = bool: TRUE;
+b_fail2 = bool: TRUE;
+b_fail3 = bool: FALSE;
+
+foo (x = int, y = bool) = char
+{
+    a = foo(5.A, TRUE)
+    a = foo('5', FALSE)
+    a = foo(5, FALSE)
+    a = foo(FALSE, 5) // Error: incompatible parameter type
+    a = foo(TRUE, 5) // Error: incompatible parameter type
+
+    a = foo(5, 5.A) // Error: incompatible parameter type
+
+    a = foo(5, 5) // Error: incompatible parameter type
+};
+
+foo2 (xq = int, yq = bool, zq = float) = char 
+{
+    a = foo2(1,TRUE, 5)
+    a = foo2(1,TRUE, FALSE)  // Error: incompatible parameter type
+    a = foo2(1,TRUE, TRUE)  // Error: incompatible parameter type
+
+    c = foovoidchar()
+    i = foovoidint()
+    f = foovoidfloat()
+    b = foovoidbool()
+
+    a_fail = foovoidbool() //Error: invalid function type for atribuition 
+    b_fail0 = foovoidfloat() //Error: invalid function type for atribuition 
+    
+};
+
+foochar (x12 = int, y12 = bool) = char
+{
+    c = foochar(5, TRUE)
+    c = fooint(5, TRUE)
+    c = foofloat(5, TRUE)
+    c_fail = foobool(5, TRUE) //Error: invalid function type for atribuition
+};
+
+fooint (x23 = int, y23 = bool) = int
+{
+    i = foochar(5, TRUE)
+    i = fooint(5, TRUE)
+    i = foofloat(5, TRUE)
+    i_fail = foobool(5, TRUE) //Error: invalid function type for atribuition
+};
+
+foofloat (x34 = int, y34 = bool) = float
+{
+    f = foochar(5, TRUE)
+    f = fooint(5, TRUE)
+    f = foofloat(5, TRUE)
+    f_fail = foobool(5, TRUE) //Error: invalid function type for atribuition 
+};
+
+foobool (x45 = int, y45 = bool) = bool
+{
+    b_fail1 = foochar(5, TRUE) //Error: invalid function type for atribuition 
+    b_fail2 = fooint(5, TRUE) //Error: invalid function type for atribuition 
+    b_fail3 = foofloat(5, TRUE) //Error: invalid function type for atribuition 
+    b = foobool(5, TRUE) 
+};
+
+
+myfunc2 (x2 = float, y2 = int, z2 = float, w2 = bool) = char 
+{
+    a = 5
+    f = myfunc2('A', 5, 5.D, 5) // Error: incompatible parameter type
+    c = myfunc2(5, 5, 5.D, 5) // Error: incompatible parameter type
+    a = myfunc2(5.A, 5, 5.D, 5) // Error: incompatible parameter type 
+    a = myfunc2(5, 5, 5.D, FALSE)
+
+};
+
+foovoidchar () = char {};
+foovoidint () = int {};
+foovoidfloat () = float {};
+foovoidbool () = bool {};

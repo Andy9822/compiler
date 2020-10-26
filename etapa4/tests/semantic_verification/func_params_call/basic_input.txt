@@ -11,22 +11,22 @@ vecb = bool[1];
 
 myfunc (x = float, y = int, z = float, w = bool) = char 
 {
-    a = myfunc(a, f, c, c)
-    a = 2 + myfunc(a + 2 - 'c' * c, f * 2.A, a/a, vecc[0] - myOtherfunc())
+    a = myfunc(a, f, c, b)
+    a = 2 + myfunc(a + 2 - 'c' * c, f * 2.A, a/a, vecc[0] != myOtherfunc())
     b = foop(TRUE) != myOtherfunc()
     b = foop(foo()) != myOtherfunc()
 
     c = myOtherfunc() * myOtherfunc()
     b = foo() ^ (myOtherfunc() > 5)
-    b = fooF(foop(foo()),myfunc(a, f, c, a))
+    b = fooF(foop(foo()),myfunc(a, f, c, b))
     
     a = myfuncLess(a, f, c) // ERRO: menos parametros
-    a = myfuncMore(a, f, c,a, a) // ERRO: mais parametros
+    a = myfuncMore(a, f, c, b, a) // ERRO: mais parametros
 
     a = myfuncWrongTypeParm(b, f, 5 > 5, c, a) // ERRO: parametros tipo errado
     a = myfuncWrongTypeParm2(foo(), f) // ERRO: parametros tipo errado
     
-    a = fooF(fooF(foop(foo()),myfuncLess(a, f, c, a)), f) // ERRO: parametros tipo errado e erro geral
+    a = fooF(fooF(foop(foo()),myfuncLess(a, f, c, b)), f) // ERRO: parametros tipo errado e erro atribuicao
 
     a = foopMore(TRUE, 5) // ERRO: received more than expected
     a = foop() // ERRO: expects arguments

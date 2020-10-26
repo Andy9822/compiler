@@ -12,12 +12,18 @@ void process_local_variable(AST * param_node, AST * func_node)
         printf("Semantic Error: local variable %s has already been declared in other function\n", param_node->son[0]->symbol->text);
         ++SemanticErrors;
     }
+
+    if (param_node->son[0]->symbol->type == SYMBOL_VARIABLE)
+    {
+        printf("Semantic Error: parameter %s has already been declared as variable\n", param_node->son[0]->symbol->text);
+        ++SemanticErrors;
+    }
     
     param_node->son[0]->symbol->type = SYMBOL_LOCAL_VARIABLE;
-
     // Save identifier in function's scope variables list
     char* var_name = param_node->son[0]->symbol->text;
     int var_type = param_node->son[1]->symbol->type;
+    // printf("vou inserir local var %s de tipo %d \n",var_name, var_type);
     insert_local_variable(func_node->symbol, var_name, var_type);
 }
 
@@ -380,7 +386,7 @@ void validate_FUNC_PARAMETERS_CALL(AST * node)
     if (!compatibleTypes(param_type, expected_param_type))
     {
         SemanticErrors++;
-        printf("Semantic Error: function %s receiving invalid parameter\n", func_name);
+        printf("Semantic Error: function %s receiving invalid parameter type\n", func_name);
         return;
     }
     avaliated_params+=1;
@@ -411,7 +417,7 @@ void validate_FUNC_PARAMETERS_CALL(AST * node)
     while (1)
     {
         // printf("ast type %d \n", params_list_node->type);
-        expected_param_type = getDatatypeFromSymbol(get_scope_index(func_node->symbol, avaliated_params));
+        expected_param_type = getDatatypeFromSymbol(get_scope_index(func_node->symbol, avaliated_params+1));
         param_type = infer_type(params_list_node->son[0]);
         check_operands(params_list_node->son[0], 1);
         // printf("expected param %d has type %d \n", avaliated_params+1, expected_param_type);
@@ -450,6 +456,58 @@ void validate_FUNC_PARAMETERS_CALL(AST * node)
 
 }
 
+void validate_FUNC_PARAMETERS_DEC(AST * node)
+{
+    int num_variables = get_scope_len(node->son[0]->symbol);
+    int variables_counter = 1;
+
+    //Set all scope identifiers as valid variables
+    // hashPrint();
+    // printf(" \n");
+    while ( variables_counter <= num_variables)
+    {
+        char* param_name = get_scope_var_name_at_index(node->son[0]->symbol, variables_counter++); // TODO fix that shit
+        HASH_NODE* param_node = hashFind(param_name);
+        // printf("parameter %s type %d \n", param_name, param_node->type);
+        if (param_node->type != SYMBOL_VARIABLE && param_node->type != SYMBOL_USED_LOCAL_VARIABLE) //TODO this is a workaround for the TODO above
+        {
+            param_node->data_type = getDatatypeFromSymbol(param_node->type);
+            param_node->type = SYMBOL_VARIABLE;
+        }
+        else if (param_node->type == SYMBOL_USED_LOCAL_VARIABLE)
+        {
+            SemanticErrors++;
+            printf("Semantic Error: local variable %s has already been declared in other function\n", param_name);
+        }
+        else
+        {
+            SemanticErrors++;
+            printf("Semantic Error: parameter %s already declared as a variable\n", param_name);
+        }
+        
+    }
+    // hashPrint();
+    // printf(" \n");
+    int i;
+    for (i = 0; i < MAX_SONS; i++)
+    {
+        check_operands(node->son[i], 0);
+    }
+
+    //Set back all scope identifiers to local_variables, meaning they're not valid variables to be used anymore
+    variables_counter = 1;
+    while ( variables_counter <= num_variables)
+    {
+        char* param_name = get_scope_var_name_at_index(node->son[0]->symbol, variables_counter++); // TODO fix that shit
+        HASH_NODE* param_node = hashFind(param_name);
+        param_node->data_type = DATATYPE_ERROR;
+        param_node->type = SYMBOL_USED_LOCAL_VARIABLE;
+        
+    }
+    // hashPrint();
+    // printf(" \n");
+    
+}
 void validate_AST_SYMBOL(AST * node)
 {
     if (node->symbol->type != SYMBOL_VARIABLE
@@ -553,9 +611,18 @@ void check_operands(AST* node, int flag)
             }
             break;
     
+        case AST_FUNC_PARAMS_DEC:
+            validate_FUNC_PARAMETERS_DEC(node);
+            break;
+    
     }
     for (i = 0; i < MAX_SONS; i++)
     {
+        if (node->type == AST_FUNC_PARAMS_DEC)
+        {
+            return;
+        }
+        
         check_operands(node->son[i], 0);
     }
 }

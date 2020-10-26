@@ -118,6 +118,10 @@ void insert_local_variable(HASH_NODE* node, char* local_variable_name, int local
   { 
     node->scope_variables = new_variable;
   }
+
+  // Atualiza o nodo daquele identificador para ter o tipo
+  HASH_NODE * local_var_node = hashFind(local_variable_name);
+  local_var_node->type = local_variable_type;
 }
 
 void print_scope_variables(HASH_NODE* node)
@@ -168,6 +172,29 @@ int get_scope_index(HASH_NODE* node, int idx)
     if (idx == 0)
     {
       return ptr_variable->type;
+    }
+
+    // printf("variavel %s tipo %d \n", ptr_variable->text, ptr_variable->type);
+    ptr_variable = ptr_variable->next;
+    idx-=1;
+  }
+}
+
+char* get_scope_var_name_at_index(HASH_NODE* node, int idx)
+{
+  LOCAL_VARIABLE *ptr_variable = node->scope_variables;
+
+  if (idx == 0)
+  {
+    return ptr_variable->text;
+  }
+  idx -=1;
+  
+  while (ptr_variable)
+  {
+    if (idx == 0)
+    {
+      return ptr_variable->text;
     }
 
     // printf("variavel %s tipo %d \n", ptr_variable->text, ptr_variable->type);
