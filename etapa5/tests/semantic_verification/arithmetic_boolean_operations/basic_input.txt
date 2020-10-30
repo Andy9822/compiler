@@ -1,0 +1,106 @@
+c = char: 0FA.4;
+i = char: 0FA.4;
+f = char: 0FA.4;
+
+b = bool: TRUE;
+b1 = bool: TRUE;
+b2 = bool: TRUE;
+b3 = bool: TRUE;
+b4 = bool: TRUE;
+b5 = bool: TRUE;
+b6 = bool: TRUE;
+
+
+cf1 = char: 0FA.4;
+cf2 = char: 0FA.4;
+cf3 = char: 0FA.4;
+cf4 = char: 0FA.4;
+cf5 = char: 0FA.4;
+cf6 = char: 0FA.4;
+cf7 = char: 0FA.4;
+cf8 = char: 0FA.4;
+cf9 = char: 0FA.4;
+
+if1 = char: 0FA.4;
+if2 = char: 0FA.4;
+if3 = char: 0FA.4;
+if4 = char: 0FA.4;
+if5 = char: 0FA.4;
+if6 = char: 0FA.4;
+if7 = char: 0FA.4;
+if8 = char: 0FA.4;
+if9 = char: 0FA.4;
+
+ff1 = char: 0FA.4;
+ff2 = char: 0FA.4;
+ff3 = char: 0FA.4;
+ff4 = char: 0FA.4;
+ff5 = char: 0FA.4;
+ff6 = char: 0FA.4;
+ff7 = char: 0FA.4;
+ff8 = char: 0FA.4;
+ff9 = char: 0FA.4;
+
+bf1 = bool: TRUE;
+bf2 = bool: TRUE;
+
+fun () = int 
+{
+    // Arithmetic operations
+    c = 99 + 1111 + 1 + 'c' + 2.A - (1)
+    c = (5 * 4 - 3 + 'c' / 2.4)
+    i = 99 + 1111 + 1 + 'c' + 2.A - (1)
+    i = (5 * 4 - 3 + 'c' / 2.4)
+    f = 99 + 1111 + 1 + 'c' + 2.A - (1)
+    f = (5 * 4 - 3 + 'c' / 2.4)
+
+    //Wrong atribuition type
+    bf1 = 99 + 1111 + 1 + 'c' + 2.A - (1) // eh pra dar erro
+    bf2 = (5 * 4 - 3 + 'c' / 2.4) // eh pra dar erro
+
+
+
+    // Boolean operations
+    b = 5 > 5 
+    b1 = (5 * 4 - 3 + 'c' / 2.4) > 5 
+    b2 = ('c' * 'd') < 6 
+    b3 = ('c' / 'd') >=  1 / 1 
+    b4 = ('c' * 'd') <= 6 
+    b5 = TRUE ^ FALSE
+    b6 = (('c' * 'd') <= 6) | FALSE
+    b7 = ~FALSE
+    b8 = (~(('c' * 'd') <= 6))
+
+    //Wrong atribuition type
+    cf1 = 5 > 5  // eh pra dar erro
+    cf2 = (5 * 4 - 3 + 'c' / 2.4) > 5  // eh pra dar erro
+    cf3 = ('c' * 'd') < 6  // eh pra dar erro
+    cf4 = ('c' / 'd') >=  1 / 1  // eh pra dar erro
+    cf5 = ('c' * 'd') <= 6  // eh pra dar erro
+    cf6 = TRUE ^ FALSE // eh pra dar erro
+    cf7 = (('c' * 'd') <= 6) | FALSE // eh pra dar erro
+    cf8 = ~FALSE // eh pra dar erro
+    cf9 = (~(('c' * 'd') <= 6)) // eh pra dar erro
+    if1 = 5 > 5  // eh pra dar erro
+    if2 = (5 * 4 - 3 + 'c' / 2.4) > 5  // eh pra dar erro
+    if3 = ('c' * 'd') < 6  // eh pra dar erro
+    if4 = ('c' / 'd') >=  1 / 1  // eh pra dar erro
+    if5 = ('c' * 'd') <= 6  // eh pra dar erro
+    if6 = TRUE ^ FALSE // eh pra dar erro
+    if7 = (('c' * 'd') <= 6) | FALSE // eh pra dar erro
+    if8 = ~FALSE // eh pra dar erro
+    if9 = (~(('c' * 'd') <= 6)) // eh pra dar erro
+    ff1 = 5 > 5  // eh pra dar erro
+    ff2 = (5 * 4 - 3 + 'c' / 2.4) > 5  // eh pra dar erro
+    ff3 = ('c' * 'd') < 6  // eh pra dar erro
+    ff4 = ('c' / 'd') >=  1 / 1  // eh pra dar erro
+    ff5 = ('c' * 'd') <= 6  // eh pra dar erro
+    ff6 = TRUE ^ FALSE // eh pra dar erro
+    ff7 = (('c' * 'd') <= 6) | FALSE // eh pra dar erro
+    ff8 = ~FALSE // eh pra dar erro
+    ff9 = (~(('c' * 'd') <= 6)) // eh pra dar erro
+    
+};
+
+b7 = bool: TRUE;
+b8 = bool: TRUE;

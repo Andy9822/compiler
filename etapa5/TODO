@@ -1,0 +1,32 @@
+Lista de Verificações 
+• variáveis redeclaradas ✅
+• anotar tipo (natureza) nas tabela hash ✅
+• anotar tipo de dado (dataType) na tabela hash ✅
+• declaração de vetores ✅
+• inicialização de vetores ✅
+• inferência recursiva de tipos ✅ 
+• variáveis não-declaradas ✅
+• funções não-declaradas ✅
+• habilitar variáveis em operações aritmeticas e booleanas ✅ 
+• verificar expressao do if resolve em bool ✅ 
+• verificar == e != ✅
+• verificar natureza, se: 
+    -escalares são usados como escalares ✅
+    -vetores são usados como vetores ✅
+    -variaveis são usados como variaveis ✅
+    -funções são usadas como funções ✅
+    -funções não conseguem ser usadas nem como variavel nem como vetor nem atribuir nada a elas ✅
+    -não esqueça de verificar no lado direito (expressões) e no lado esquerdo (atribuições) ✅
+• verificar tipos de dados nas expressões ✅
+• verificar argumentos de chamada de função versus parâmetros: 
+    -não pode haver menos argumentos ✅
+    -não pode haver mais argumentos ✅
+    -os tipos devem ser compatíveis (não iguais, lembre-se) ✅
+
+• verificar tipo do valor de retorno da função ✅
+• verificar invocacao de funcao como expressao ✅
+• verificar expressoes dentro como parametro de funcao ✅
+• verificar uso de variaveis locais ✅
+• verificar variavel local morre em outra funcao como expressao ✅
+• verificar índices dos vetores (não pode ser booleano, não pode ser float), tanto na expressão quanto na atribuição ✅
+• ❗❗❗ RETORNAR 4 ❗❗❗ - ❗❗❗ RETORNAR 4 ❗❗❗ - ❗❗❗ RETORNAR 4 ❗❗❗ - ❗❗❗ RETORNAR 4 ❗❗❗ - ❗❗❗ RETORNAR 4 ❗❗❗  ❌

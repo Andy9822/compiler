@@ -1,0 +1,11 @@
+Semantic Error: number of initialization values does not match len 10 of vector ai
+Semantic Error: number of initialization values does not match len 10 of vector bi
+Semantic Error: number of initialization values does not match len 10 of vector ci
+Semantic Error: number of initialization values does not match len 5 of vector di
+Semantic Error: invalid values type in vector af initialization
+Semantic Error: invalid values type in vector bf initialization
+Semantic Error: invalid values type in vector cf initialization
+Semantic Error: invalid values type in vector df1 initialization
+Semantic Error: invalid values type in vector df2 initialization
+Semantic Error: invalid values type in vector df3 initialization
+Compilation ERROR! 

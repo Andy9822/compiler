@@ -1,0 +1,7 @@
+Semantic Error: function myOtherfunc has already been declared
+Semantic Error: function repeatedfunc has already been declared
+Semantic Error: local variable x1 has already been declared in other function
+Semantic Error: local variable y1 has already been declared in other function
+Semantic Error: local variable z1 has already been declared in other function
+Semantic Error: local variable w1 has already been declared in other function
+Compilation ERROR! 

@@ -1,0 +1,40 @@
+c = bool: TRUE;
+bv = bool[1]: FALSE;
+f = float: 5.A;
+fv = float[2]: 5.A 2.F;
+i = int: 5;
+iv = int[10];
+fun () = int 
+{
+    
+    while (5 != 5) {} 
+    while ( TRUE ) {
+        i = 5
+        i = 5 * i /2 + iv[2] 
+    } 
+
+    while (f >= i)  {}
+    while (bv[0] ^ c)  {}
+    while (f <= i)  { i = 5}  
+    
+    while (i<10)  {}
+    while (i<10)  {}
+    while (((~a) ^ (b)) | c )  {}  
+    while (a)  {}
+    while (a == b)  {}
+    while (a != b)  {}
+    while (a ^ b)  {}
+    while (a | b)  {}
+
+    while (~a)  { i = i * 2}
+    while (~a)  { i = iv[0]}
+
+    while (f + i)  {} // eh pra dar erro
+    while (f - i)  {} // eh pra dar erro
+    while (f[1] * iv[2])  {} // eh pra dar erro
+    while (f / i)  {} // eh pra dar erro
+    while (0) {} // eh pra dar erro
+};
+
+a = bool: FALSE;
+b = bool: TRUE;

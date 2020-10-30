@@ -1,0 +1,51 @@
+i1 = int: 5;
+f1 = float: 5;
+c1 = char: 5;
+
+if1 = int: 5;
+if2 = int: 5;
+if3 = int: 5;
+
+iff1 = int: 5;
+b = bool: TRUE;
+bf = bool: TRUE;
+v1 = int[10];
+v1f = int[10];
+v2f = int[10];
+v3f = int[10];
+v4f = int[10];
+v5f = int[10];
+v6f = int[10];
+v7f = int[10];
+v8f = int[10];
+v9f = int[10];
+v10f = int[10];
+v11f = int[10];
+v12f = int[10];
+
+vf = float[10];
+vf1f = float[10];
+vf2f = float[10];
+vf3f = float[10];
+
+v2 = bool[10];
+vb1f = bool[10];
+vb2f = bool[10];
+vb3f = bool[10];
+
+vc = char[10];
+vc1f = char[10];
+
+fun () = int 
+{
+    // Access variables, vectors and functions
+    i1 = v1[1] + 1
+    iff1 = 2.A * v1f
+    b = 1 <= v1['a']
+    bf = 1 <= v2f
+    v1[1] = 2 + 1
+    v3f = 2 + 1
+    fun = 2 + 1
+    fun[TRUE] = 2 + 1
+    i1 = f1[0]
+};

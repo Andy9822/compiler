@@ -1,0 +1,10 @@
+Semantic Error: function myfuncLess receiving less parameters than expected
+Semantic Error: function myfuncMore receiving more parameters than expected
+Semantic Error: function myfuncWrongTypeParm receiving invalid parameter type
+Semantic Error: function myfuncWrongTypeParm2 receiving invalid parameter type
+Semantic Error: function fooF receiving invalid parameter type
+Semantic Error: invalid value type for a atribuition 
+Semantic Error: function foopMore receiving more parameters than expected
+Semantic Error: function foop expects arguments
+Semantic Error: function foo1less receiving less parameters than expected
+Compilation ERROR! 

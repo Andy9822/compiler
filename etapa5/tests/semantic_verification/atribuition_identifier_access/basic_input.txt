@@ -1,0 +1,112 @@
+i1 = int: 5;
+f1 = float: 5;
+ff1 = float: 5;
+c1 = char: 5;
+cf1 = char: 5;
+
+if1 = int: 5;
+if2 = int: 5;
+if3 = int: 5;
+if4 = int: 5;
+if5 = int: 5;
+if6 = int: 5;
+
+iff1 = int: 5;
+b = bool: TRUE;
+bf = bool: TRUE;
+bf1 = bool: TRUE;
+bf2 = bool: TRUE;
+bf3 = bool: TRUE;
+v1 = int[10];
+v1f = int[10];
+v2f = int[10];
+v3f = int[10];
+v4f = int[10];
+v5f = int[10];
+v6f = int[10];
+v7f = int[10];
+v8f = int[10];
+v9f = int[10];
+v10f = int[10];
+v11f = int[10];
+v12f = int[10];
+v13f = int[10];
+
+vf = float[10];
+vf1f = float[10];
+vf2f = float[10];
+vf3f = float[10];
+vf4f = float[10];
+
+v2 = bool[10];
+vb1f = bool[10];
+vb2f = bool[10];
+vb3f = bool[10];
+vb4f = bool[10];
+
+vc = char[10];
+vc1f = char[10];
+
+fun () = int 
+{
+    v1[c1] = 2 + 1  
+    v1[i1] = 2 * 1  
+    v4f[b] = 2 + 1  
+    v5f[f1] = 2 + 1  
+
+    v1['a'] = 2 - 1  
+    v1[2] = 2 / 1  
+    v6f[2.A] = 2 / 1  
+    v7f[TRUE] = 2 + 1 
+
+    v8f[1] = v2[1] 
+
+    v1[1] = 2 + 1  
+    v1[1] = 2 + 1.A  
+    v1[1] = 2.A + 'C'  
+    vb1f[1] = 2 + 1  
+    v2[1] = v2[1] 
+
+    i1 = v1[1]
+    i1 = v1['a']
+    if1 = v9f[2.A]
+    if2 = v10f[TRUE]
+    
+    i1 = v1[i1]
+    i1 = v1[c1]
+    if1 = v11f[f1]
+    if2 = v12f[b]
+    if3 = v2[0]
+    
+    vf[0] = v1[i1]
+    vf[0] = vf[i1]
+    vf[0] = vc[i1]
+    vf1f[0] = v2[i1]
+    
+    vc[0] = v1[i1]
+    vc[0] = vf[i1]
+    vc[0] = vc[i1]
+    vc1f[0] = v2[i1]
+    
+    v1[0] = v1[i1]
+    v1[0] = vf[i1]
+    v1[0] = vc[i1]
+    v13f[0] = v2[i1]
+
+    vb1f[0] = v1[i1]
+    vb2f[0] = vf[i1]
+    vb3f[0] = vc[i1]
+    v2[0] = v2[i1]
+
+    if4 = v2[0]
+    ff1 = v2[0]
+    cf1 = v2[0]
+    b = v2[0]
+
+    b = v2[0]
+    bf1 = vf[0]
+    bf2 = vc[0]
+    bf3 = v1[0]
+
+    if5 = fun
+};
