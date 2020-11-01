@@ -23,6 +23,7 @@
 #define SYMBOL_FUNCTION 14
 #define SYMBOL_LOCAL_VARIABLE 15
 #define SYMBOL_USED_LOCAL_VARIABLE 16
+#define SYMBOL_LABEL 17
 
 enum
 {
@@ -53,6 +54,8 @@ void hash_init();
 int hashString(char string[]);
 HASH_NODE * hashInsert(char string[], int type);
 HASH_NODE *hashFind(char *text);
+HASH_NODE *makeTemp();
+HASH_NODE *makeLabel();
 void hashPrint();
 int hash_check_undeclared();
 void insert_local_variable(HASH_NODE* node, char* local_variable_name, int local_variable_type);

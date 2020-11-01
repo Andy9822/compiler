@@ -202,3 +202,21 @@ char* get_scope_var_name_at_index(HASH_NODE* node, int idx)
     idx-=1;
   }
 }
+
+HASH_NODE *makeTemp() 
+{
+  static int serial = 0;
+  char buffer[256] = ".";
+
+  sprintf(buffer, "myWeeirT_emp%d", serial++);
+  return hashInsert(buffer, SYMBOL_VARIABLE);
+}
+
+HASH_NODE *makeLabel() 
+{
+  static int serial = 0;
+  char buffer[256] = ".";
+
+  sprintf(buffer, "myWeeirL_abael%d", serial++);
+  return hashInsert(buffer, SYMBOL_LABEL);
+}
