@@ -15,6 +15,10 @@ enum
   TAC_JMP,
   TAC_JMP_FALSE,
   TAC_LABEL,
+  TAC_RETURN,
+  TAC_PRINT,
+  TAC_READ,
+  TAC_WHILE,
 };
 
 typedef struct tac_node 
