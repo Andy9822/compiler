@@ -140,7 +140,7 @@ cmd: atribuition    {$$ = $1;}
     ;
 
 flowcommand: ifcommand              {$$ = $1;}
-    | KW_WHILE '(' expression ')'   {$$ = astCreate(AST_WHILE, 0,  $3, 0, 0, 0, 0);}
+    | KW_WHILE '(' expression ')' cmd    {$$ = astCreate(AST_WHILE, 0,  $3, $5, 0, 0, 0);}
     | KW_LOOP '(' TK_IDENTIFIER ':' expression ',' expression ',' expression ')' cmd {$$ = astCreate(AST_LOOP, 0,  astCreateSymbol($3), $5, $7, $9, $11);}
     ;
 
