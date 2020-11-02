@@ -27,6 +27,7 @@ void tacPrint(TAC* tac)
     case TAC_ADD:  fprintf(stderr, "TAC_ADD");  break;
     case TAC_SUB: fprintf(stderr, "TAC_SUB"); break;
     case TAC_COPY: fprintf(stderr, "TAC_COPY"); break;
+    case TAC_JMP: fprintf(stderr, "TAC_JMP"); break;
     case TAC_JMP_FALSE: fprintf(stderr, "TAC_JMP_FALSE"); break;
     case TAC_LABEL: fprintf(stderr, "TAC_LABEL"); break;
     default: fprintf(stderr, "TAC_UNDEFINED"); break;
@@ -72,7 +73,6 @@ TAC* createIf(TAC* code0, TAC* code1)
 {
   TAC* jmp_tac = 0;
   TAC* label_tac = 0;
-  
   HASH_NODE* new_label = 0;
   new_label = makeLabel();
 
@@ -82,6 +82,39 @@ TAC* createIf(TAC* code0, TAC* code1)
   label_tac->prev = code1;
 
   return tacJoin(jmp_tac, label_tac);
+
+}
+
+TAC* createIfElse(TAC* code0, TAC* code1, TAC* code2)
+{
+  TAC* jmp_false_tac = 0;
+  TAC* jmp_end_tac = 0;
+  TAC* label_false_tac = 0;
+  TAC* label_end_else_tac = 0;
+  
+  HASH_NODE* else_label = 0;
+  else_label = makeLabel();
+
+  HASH_NODE* end_else_label = 0;
+  end_else_label = makeLabel();
+
+  // Cria jmp_false, com prev sendo a expressão do if
+  jmp_false_tac = tacCreate(TAC_JMP_FALSE, else_label, code0->res, 0);
+  jmp_false_tac->prev = code0;
+
+  // Cria jmp (incondicional) após o bloco do if-then para ele não entrar no bloco do else e ir para fim de if-then-else
+  jmp_end_tac = tacCreate(TAC_JMP, end_else_label, code0->res, 0);
+  jmp_end_tac->prev = code1;
+
+  // Se a expressao era falsa, o jmp_false saltará ate o label do else
+  label_false_tac = tacCreate(TAC_LABEL, else_label, 0, 0);
+  label_false_tac->prev = jmp_end_tac;
+
+  // No fim do else, será criado um label para representar o fim do bloco if-else-then
+  label_end_else_tac = tacCreate(TAC_LABEL, end_else_label, 0, 0);
+  label_end_else_tac->prev = code2;
+
+  return tacJoin(jmp_false_tac, tacJoin(label_false_tac, label_end_else_tac));
 
 }
 
@@ -119,9 +152,14 @@ TAC* generateCode(AST* node)
     case AST_IF:  
       result = createIf(code[0], code[1]); 
       break;
+
+    case AST_IF_ELSE:  
+      result = createIfElse(code[0], code[1], code[2]); 
+      break;
     
     default:           
-      result =  tacJoin(code[0], tacJoin(code[1], tacJoin(code[2], tacJoin(code[3], code[4])))); break;
+      result = tacJoin(code[0], tacJoin(code[1], tacJoin(code[2], tacJoin(code[3], code[4])))); 
+      break;
   }
 
   return result;

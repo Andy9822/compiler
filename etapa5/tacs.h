@@ -12,6 +12,7 @@ enum
   TAC_COPY,
   TAC_IF,
   TAC_IF_ELSE,
+  TAC_JMP,
   TAC_JMP_FALSE,
   TAC_LABEL,
 };
