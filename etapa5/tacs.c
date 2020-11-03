@@ -271,8 +271,8 @@ TAC* generateCode(AST* node)
       break;
     
     case AST_PRINTCMD:
-      //TODO isso só printa 1 elemento, se for uma lista o resto (??????)
-      result = tacJoin(tacJoin(code[0], code[1]), tacCreate(TAC_PRINT, code[0]?code[0]->res:0, 0, 0));
+    case AST_PRINTLIST:
+      result = tacJoin(tacJoin(code[0], tacCreate(TAC_PRINT, code[0]?code[0]->res:0, 0, 0)), code[1]);
       break;
     
     case AST_READ:
