@@ -1,0 +1,14 @@
+TAC(TAC_BEGINFUN, fun, 0, 0);
+TAC(TAC_COPY, f, 2, 0);
+TAC(TAC_ENDFUN, fun, 0, 0);
+TAC(TAC_BEGINFUN, fun2, 0, 0);
+TAC(TAC_COPY, a, f, 0);
+TAC(TAC_ENDFUN, fun2, 0, 0);
+TAC(TAC_BEGINFUN, fun3, 0, 0);
+TAC(TAC_COPY, b, TRUE, 0);
+TAC(TAC_ENDFUN, fun3, 0, 0);
+TAC(TAC_BEGINFUN, fun4, 0, 0);
+TAC(TAC_ENDFUN, fun4, 0, 0);
+TAC(TAC_BEGINFUN, fun5, 0, 0);
+TAC(TAC_ENDFUN, fun5, 0, 0);
+Compilation successfull! 

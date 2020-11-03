@@ -1,0 +1,35 @@
+out_before = char: 0FA.4;
+out_after = char: 0FA.4;
+idx = char: 0FA.4;
+a = char: 0FA.4;
+c = char: 0FA.4;
+i = char: 0FA.4;
+f = char: 0FA.4;
+
+fun () = int 
+{
+   f = 2
+};
+
+fun2 () = int 
+{
+  a = f
+};
+
+fun3 () = char 
+{
+  b = TRUE 
+};
+
+fun4 () = int 
+{
+  
+};
+
+fun5 () = bool 
+{
+  {
+      
+  }
+};
+b = bool: TRUE;
