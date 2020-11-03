@@ -1,0 +1,35 @@
+out_before = char: 0FA.4;
+out_after = char: 0FA.4;
+idx = char: 0FA.4;
+a = char: 0FA.4;
+c = char: 0FA.4;
+i = char: 0FA.4;
+f = char: 0FA.4;
+mundofeliz = char: 0FA.4;
+
+fun () = int 
+{
+    if (a != 2) then { 
+        a = 5555 - 1
+        b = b
+        c = 76666 + 4
+    }
+
+    if (a == 2) then { 
+        a = 5
+        b = TRUE
+        c = 70 + 1
+     }
+    else {
+        a = a-1
+        b = b ^ FALSE
+        f = f-3
+    }
+    
+    mundofeliz = 100 + 101 
+    if (a == 0) then {
+    a = 5 b = ~b}
+    if (a >= 2) then a = 5 else a = 6
+};
+
+b = bool: TRUE;
