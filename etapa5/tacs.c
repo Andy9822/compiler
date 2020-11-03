@@ -45,6 +45,8 @@ void tacPrint(TAC* tac)
     case TAC_PRINT:     fprintf(stderr, "TAC_PRINT"); break;
     case TAC_READ:      fprintf(stderr, "TAC_READ"); break;
     case TAC_WHILE:     fprintf(stderr, "TAC_WHILE"); break;
+    case TAC_BEGINFUN:  fprintf(stderr, "TAC_BEGINFUN"); break;
+    case TAC_ENDFUN:    fprintf(stderr, "TAC_ENDFUN"); break;
     default: fprintf(stderr, "TAC_UNDEFINED"); break;
   }
   
@@ -84,6 +86,11 @@ TAC* tacJoin(TAC* l1, TAC* l2)
 
 
 // ############################# Code generation helpers #############################
+TAC* createFunc(HASH_NODE* symbol, TAC* code_expr)
+{
+  return tacJoin(tacJoin(tacCreate(TAC_BEGINFUN, symbol, 0, 0), code_expr), tacCreate(TAC_ENDFUN, symbol, 0, 0)); 
+}
+
 TAC* createAttribution(HASH_NODE* symbol, TAC* code_expr)
 {
   return tacJoin(code_expr, tacCreate(TAC_COPY, symbol, code_expr->res, 0)); 
@@ -269,6 +276,14 @@ TAC* generateCode(AST* node)
     case AST_ATRIBUITION:  
       result = createAttribution(node->son[0]->symbol, code[1]);
       break;
+
+    case AST_FUNC_VOID_DEC:  
+      result = createFunc(node->son[0]->symbol, code[2]);
+      break;
+    
+    case AST_FUNC_PARAMS_DEC:  
+      result = createFunc(node->son[0]->symbol, code[4]);
+      break;
     
     case AST_PRINTCMD:
     case AST_PRINTLIST:
@@ -282,7 +297,6 @@ TAC* generateCode(AST* node)
     case AST_IF:  
       result = createIf(code[0], code[1]); 
       break;
-
 
     case AST_IF_ELSE:  
       result = createIfElse(code[0], code[1], code[2]); 

@@ -31,6 +31,8 @@ enum
   TAC_PRINT,
   TAC_READ,
   TAC_WHILE,
+  TAC_BEGINFUN,
+  TAC_ENDFUN,
 };
 
 typedef struct tac_node 
