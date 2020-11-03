@@ -43,10 +43,13 @@ void tacPrint(TAC* tac)
     case TAC_JMP_FALSE: fprintf(stderr, "TAC_JMP_FALSE"); break;
     case TAC_LABEL:     fprintf(stderr, "TAC_LABEL"); break;
     case TAC_PRINT:     fprintf(stderr, "TAC_PRINT"); break;
+    case TAC_RETURN:    fprintf(stderr, "TAC_RETURN"); break;
     case TAC_READ:      fprintf(stderr, "TAC_READ"); break;
     case TAC_WHILE:     fprintf(stderr, "TAC_WHILE"); break;
     case TAC_BEGINFUN:  fprintf(stderr, "TAC_BEGINFUN"); break;
     case TAC_ENDFUN:    fprintf(stderr, "TAC_ENDFUN"); break;
+    case TAC_FUNCALL:   fprintf(stderr, "TAC_FUNCALL"); break;
+    case TAC_FUNC_ARG:  fprintf(stderr, "TAC_FUNC_ARG"); break;
     default: fprintf(stderr, "TAC_UNDEFINED"); break;
   }
   
@@ -96,7 +99,7 @@ TAC* createAttribution(HASH_NODE* symbol, TAC* code_expr)
   return tacJoin(code_expr, tacCreate(TAC_COPY, symbol, code_expr->res, 0)); 
 }
 
-TAC* createBoolenArithmetic2Operands(int tac_operation, TAC* code0, TAC* code1)
+TAC* createBooleanArithmetic2Operands(int tac_operation, TAC* code0, TAC* code1)
 {
   return  tacJoin(tacJoin(code0, code1), tacCreate(tac_operation, makeTemp(), code0->res, code1->res)); 
 }
@@ -257,18 +260,18 @@ TAC* generateCode(AST* node)
       result = tacCreate(TAC_SYMBOL, node->symbol, 0, 0); 
       break;
     
-    case AST_ADD: result = createBoolenArithmetic2Operands(TAC_ADD, code[0], code[1]); break;
-    case AST_SUB: result = createBoolenArithmetic2Operands(TAC_SUB, code[0], code[1]); break;
-    case AST_DIV: result = createBoolenArithmetic2Operands(TAC_DIV, code[0], code[1]); break;
-    case AST_MULT: result = createBoolenArithmetic2Operands(TAC_MULT, code[0], code[1]); break;
-    case AST_GREATER: result = createBoolenArithmetic2Operands(TAC_GREATER, code[0], code[1]); break;
-    case AST_LESSER: result = createBoolenArithmetic2Operands(TAC_LESSER, code[0], code[1]); break;
-    case AST_OR: result = createBoolenArithmetic2Operands(TAC_OR, code[0], code[1]); break;
-    case AST_AND: result = createBoolenArithmetic2Operands(TAC_AND, code[0], code[1]); break;
-    case AST_DIF: result = createBoolenArithmetic2Operands(TAC_DIF, code[0], code[1]); break;
-    case AST_EQ: result = createBoolenArithmetic2Operands(TAC_EQ, code[0], code[1]); break;
-    case AST_GE: result = createBoolenArithmetic2Operands(TAC_GE, code[0], code[1]); break;
-    case AST_LE: result = createBoolenArithmetic2Operands(TAC_LE, code[0], code[1]); break;
+    case AST_ADD: result = createBooleanArithmetic2Operands(TAC_ADD, code[0], code[1]); break;
+    case AST_SUB: result = createBooleanArithmetic2Operands(TAC_SUB, code[0], code[1]); break;
+    case AST_DIV: result = createBooleanArithmetic2Operands(TAC_DIV, code[0], code[1]); break;
+    case AST_MULT: result = createBooleanArithmetic2Operands(TAC_MULT, code[0], code[1]); break;
+    case AST_GREATER: result = createBooleanArithmetic2Operands(TAC_GREATER, code[0], code[1]); break;
+    case AST_LESSER: result = createBooleanArithmetic2Operands(TAC_LESSER, code[0], code[1]); break;
+    case AST_OR: result = createBooleanArithmetic2Operands(TAC_OR, code[0], code[1]); break;
+    case AST_AND: result = createBooleanArithmetic2Operands(TAC_AND, code[0], code[1]); break;
+    case AST_DIF: result = createBooleanArithmetic2Operands(TAC_DIF, code[0], code[1]); break;
+    case AST_EQ: result = createBooleanArithmetic2Operands(TAC_EQ, code[0], code[1]); break;
+    case AST_GE: result = createBooleanArithmetic2Operands(TAC_GE, code[0], code[1]); break;
+    case AST_LE: result = createBooleanArithmetic2Operands(TAC_LE, code[0], code[1]); break;
 
     case AST_NOT: result = createNegation(TAC_NOT, code[0]); break;
     case AST_MINUS: result = createNegation(TAC_MINUS, code[0]); break;
@@ -289,6 +292,10 @@ TAC* generateCode(AST* node)
     case AST_PRINTLIST:
       result = tacJoin(tacJoin(code[0], tacCreate(TAC_PRINT, code[0]?code[0]->res:0, 0, 0)), code[1]);
       break;
+
+    case AST_RETURN:
+      result = tacJoin(code[0], tacCreate(TAC_RETURN, code[0]?code[0]->res:0, 0, 0));
+      break;
     
     case AST_READ:
       result = tacCreate(TAC_READ, code[0]?code[0]->res:0, 0, 0);
@@ -308,6 +315,21 @@ TAC* generateCode(AST* node)
 
     case AST_LOOP:  
       result = createLoop(node->son[0]->symbol, code[1], code[2], code[3], code[4]);
+      break;
+
+    case AST_FUNC_CALL: ;
+      HASH_NODE* func_return_temp = makeTemp();
+      result = tacCreate(TAC_FUNCALL, func_return_temp, code[0]->res, 0);
+      break;
+
+    case AST_FUNC_PARAMS_CALL: ;
+      HASH_NODE* func_return_params_temp = makeTemp();
+      TAC* tac_func_call = tacCreate(TAC_FUNCALL, func_return_params_temp, code[0]->res, 0);
+      result = tacJoin(tacJoin(tacJoin(code[1], tacCreate(TAC_FUNC_ARG, code[1]?code[1]->res:0, 0, 0)), code[2]), tac_func_call);
+      break;
+
+    case AST_EXPRESSION_LIST: ;
+      result = tacJoin(tacJoin(code[0], tacCreate(TAC_FUNC_ARG, code[0]?code[0]->res:0, 0, 0)), code[1]);
       break;
 
     default:           

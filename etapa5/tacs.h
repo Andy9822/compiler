@@ -33,6 +33,8 @@ enum
   TAC_WHILE,
   TAC_BEGINFUN,
   TAC_ENDFUN,
+  TAC_FUNCALL,
+  TAC_FUNC_ARG,
 };
 
 typedef struct tac_node 
