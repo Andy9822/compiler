@@ -71,7 +71,11 @@ test_begin_end_func:
 	- ./etapa5 tests/tac_generation/begin_end_func/basic_input.txt out.txt > tests/tac_generation/begin_end_func/basic_result.txt
 	diff tests/tac_generation/begin_end_func/basic_expected.txt tests/tac_generation/begin_end_func/basic_result.txt
 
-test: test_bool_arithm test_loop_while test_if_statement test_begin_end_func
+test_return_print_read:
+	- ./etapa5 tests/tac_generation/return_print_read/basic_input.txt out.txt > tests/tac_generation/return_print_read/basic_result.txt
+	diff tests/tac_generation/return_print_read/basic_expected.txt tests/tac_generation/return_print_read/basic_result.txt
+
+test: test_bool_arithm test_loop_while test_if_statement test_begin_end_func test_return_print_read
 
 tar:
 	- tar cvzf $(ETAPA).tgz .

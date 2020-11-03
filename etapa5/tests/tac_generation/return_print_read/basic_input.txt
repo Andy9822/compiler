@@ -1,0 +1,23 @@
+out_before = char: 0FA.4;
+out_after = char: 0FA.4;
+idx = char: 0FA.4;
+a = char: 0FA.4;
+c = char: 0FA.4;
+i = char: 0FA.4;
+f = char: 0FA.4;
+mundofeliz = char: 0FA.4;
+
+fun () = int 
+{
+    print a
+    print 4 * 4
+    print 5 + 5, 6-6, b, f
+
+    read a
+    read b
+
+    return f
+    return (a * f) != b
+};
+
+b = bool: TRUE;
