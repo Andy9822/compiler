@@ -320,6 +320,7 @@ TAC* generateCode(AST* node)
       result = createWhile(code[0], code[1]); 
       break;
 
+    // O loop espera que a expr2 seja um booleana. Após cada iteração e somar um step (expr3) se testa se expr2 é verdeira ou jmp_false
     case AST_LOOP:  
       result = createLoop(node->son[0]->symbol, code[1], code[2], code[3], code[4]);
       break;
