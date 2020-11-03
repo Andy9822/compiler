@@ -49,12 +49,6 @@ build:
 	make clean --no-print-directory
 	make --no-print-directory
 
-test-ast_generation:
-	./$(ETAPA) tests/ast-generation/basic_input.txt tests/ast-generation/output.txt
-	./$(ETAPA) tests/ast-generation/output.txt tests/ast-generation/final.txt      
-	diff tests/ast-generation/output.txt tests/ast-generation/final.txt
-	rm tests/ast-generation/output.txt tests/ast-generation/final.txt  
-
 test_bool_arithm:
 	- ./etapa5 tests/tac_generation/arithmetic_boolean_operations/basic_input.txt out.txt > tests/tac_generation/arithmetic_boolean_operations/basic_result.txt
 	diff tests/tac_generation/arithmetic_boolean_operations/basic_expected.txt tests/tac_generation/arithmetic_boolean_operations/basic_result.txt
@@ -79,7 +73,11 @@ test_vector_access:
 	- ./etapa5 tests/tac_generation/vector_access/basic_input.txt out.txt > tests/tac_generation/vector_access/basic_result.txt
 	diff tests/tac_generation/vector_access/basic_expected.txt tests/tac_generation/vector_access/basic_result.txt
 
-test: test_bool_arithm test_loop_while test_if_statement test_begin_end_func test_return_print_read test_vector_access
+test_func_call_arg:
+	- ./etapa5 tests/tac_generation/func_call_arg/basic_input.txt out.txt > tests/tac_generation/func_call_arg/basic_result.txt
+	diff tests/tac_generation/func_call_arg/basic_expected.txt tests/tac_generation/func_call_arg/basic_result.txt
+
+test: test_bool_arithm test_loop_while test_if_statement test_begin_end_func test_return_print_read test_vector_access test_func_call_arg
 
 tar:
 	- tar cvzf $(ETAPA).tgz .

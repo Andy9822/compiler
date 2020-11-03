@@ -1,0 +1,37 @@
+out_before = char: 0FA.4;
+out_after = char: 0FA.4;
+idx = char: 0FA.4;
+a = char: 0FA.4;
+c = char: 0FA.4;
+matter = char: 0FA.4;
+i = char: 0FA.4;
+only = char: 0FA.4;
+f = char: 0FA.4;
+everything = char: 0FA.4;
+b = bool: FALSE;
+
+fun () = int 
+{
+   f = fun()
+   matter = fun() / fun2()
+   i = fun3(5)
+   only = fun3(a + c)
+   everything = fun4(5*5, a / c, b !=a) / (fun() + fun3(1-2)) 
+
+};
+
+fun2 () = int 
+{
+  a = f
+};
+
+fun3 (x = int) = char 
+{
+  b = TRUE 
+};
+
+fun4 (xxx = int, y = float, z = bool) = char 
+{
+  b = TRUE 
+};
+
