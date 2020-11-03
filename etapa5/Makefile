@@ -59,7 +59,11 @@ test_bool_arithm:
 	- ./etapa5 tests/tac_generation/arithmetic_boolean_operations/basic_input.txt out.txt > tests/tac_generation/arithmetic_boolean_operations/basic_result.txt
 	diff tests/tac_generation/arithmetic_boolean_operations/basic_expected.txt tests/tac_generation/arithmetic_boolean_operations/basic_result.txt
 
-test: test_bool_arithm
+test_loop_while:
+	- ./etapa5 tests/tac_generation/loop_while/basic_input.txt out.txt > tests/tac_generation/loop_while/basic_result.txt
+	diff tests/tac_generation/loop_while/basic_expected.txt tests/tac_generation/loop_while/basic_result.txt
+
+test: test_bool_arithm test_loop_while
 
 tar:
 	- tar cvzf $(ETAPA).tgz .

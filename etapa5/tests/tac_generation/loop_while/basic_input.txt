@@ -1,0 +1,28 @@
+out_before = char: 0FA.4;
+out_after = char: 0FA.4;
+idx = char: 0FA.4;
+a = char: 0FA.4;
+c = char: 0FA.4;
+i = char: 0FA.4;
+f = char: 0FA.4;
+
+fun () = int 
+{
+    out_before = 69
+    loop(idx : 1, idx < 10, 1+1){
+        a = 2
+        b = TRUE
+        c = 4
+    }
+    out_after = 1-1
+
+
+    a = 5
+    while (f>5){
+        a = 6
+        i = 9
+    }
+    a = 5-5
+};
+
+b = bool: TRUE;
