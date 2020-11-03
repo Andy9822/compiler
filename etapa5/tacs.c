@@ -23,33 +23,35 @@ void tacPrint(TAC* tac)
   fprintf(stderr, "TAC(");
   switch (tac->type)
   {
-    case TAC_SYMBOL:    fprintf(stderr, "TAC_SYMBOL");  break;
-    case TAC_ADD:       fprintf(stderr, "TAC_ADD");  break;
-    case TAC_SUB:       fprintf(stderr, "TAC_SUB");  break;
-    case TAC_DIV:       fprintf(stderr, "TAC_DIV");  break;
-    case TAC_MULT:      fprintf(stderr, "TAC_MULT");  break;
-    case TAC_GREATER:   fprintf(stderr, "TAC_GREATER");  break;
-    case TAC_LESSER:    fprintf(stderr, "TAC_LESSER");  break;
-    case TAC_OR:        fprintf(stderr, "TAC_OR");  break;
-    case TAC_AND:       fprintf(stderr, "TAC_AND");  break;
-    case TAC_DIF:       fprintf(stderr, "TAC_DIF");  break;
-    case TAC_EQ:        fprintf(stderr, "TAC_EQ");  break;
-    case TAC_GE:        fprintf(stderr, "TAC_GE");  break;
-    case TAC_LE:        fprintf(stderr, "TAC_LE");  break;
-    case TAC_NOT:       fprintf(stderr, "TAC_NOT");  break;
-    case TAC_MINUS:     fprintf(stderr, "TAC_MINUS");  break;
-    case TAC_COPY:      fprintf(stderr, "TAC_COPY"); break;
-    case TAC_JMP:       fprintf(stderr, "TAC_JMP"); break;
-    case TAC_JMP_FALSE: fprintf(stderr, "TAC_JMP_FALSE"); break;
-    case TAC_LABEL:     fprintf(stderr, "TAC_LABEL"); break;
-    case TAC_PRINT:     fprintf(stderr, "TAC_PRINT"); break;
-    case TAC_RETURN:    fprintf(stderr, "TAC_RETURN"); break;
-    case TAC_READ:      fprintf(stderr, "TAC_READ"); break;
-    case TAC_WHILE:     fprintf(stderr, "TAC_WHILE"); break;
-    case TAC_BEGINFUN:  fprintf(stderr, "TAC_BEGINFUN"); break;
-    case TAC_ENDFUN:    fprintf(stderr, "TAC_ENDFUN"); break;
-    case TAC_FUNCALL:   fprintf(stderr, "TAC_FUNCALL"); break;
-    case TAC_FUNC_ARG:  fprintf(stderr, "TAC_FUNC_ARG"); break;
+    case TAC_SYMBOL:     fprintf(stderr, "TAC_SYMBOL");  break;
+    case TAC_ADD:        fprintf(stderr, "TAC_ADD");  break;
+    case TAC_SUB:        fprintf(stderr, "TAC_SUB");  break;
+    case TAC_DIV:        fprintf(stderr, "TAC_DIV");  break;
+    case TAC_MULT:       fprintf(stderr, "TAC_MULT");  break;
+    case TAC_GREATER:    fprintf(stderr, "TAC_GREATER");  break;
+    case TAC_LESSER:     fprintf(stderr, "TAC_LESSER");  break;
+    case TAC_OR:         fprintf(stderr, "TAC_OR");  break;
+    case TAC_AND:        fprintf(stderr, "TAC_AND");  break;
+    case TAC_DIF:        fprintf(stderr, "TAC_DIF");  break;
+    case TAC_EQ:         fprintf(stderr, "TAC_EQ");  break;
+    case TAC_GE:         fprintf(stderr, "TAC_GE");  break;
+    case TAC_LE:         fprintf(stderr, "TAC_LE");  break;
+    case TAC_NOT:        fprintf(stderr, "TAC_NOT");  break;
+    case TAC_MINUS:      fprintf(stderr, "TAC_MINUS");  break;
+    case TAC_COPY:       fprintf(stderr, "TAC_COPY"); break;
+    case TAC_COPY_VEC:   fprintf(stderr, "TAC_COPY_VEC"); break;
+    case TAC_JMP:        fprintf(stderr, "TAC_JMP"); break;
+    case TAC_JMP_FALSE:  fprintf(stderr, "TAC_JMP_FALSE"); break;
+    case TAC_LABEL:      fprintf(stderr, "TAC_LABEL"); break;
+    case TAC_PRINT:      fprintf(stderr, "TAC_PRINT"); break;
+    case TAC_RETURN:     fprintf(stderr, "TAC_RETURN"); break;
+    case TAC_READ:       fprintf(stderr, "TAC_READ"); break;
+    case TAC_WHILE:      fprintf(stderr, "TAC_WHILE"); break;
+    case TAC_BEGINFUN:   fprintf(stderr, "TAC_BEGINFUN"); break;
+    case TAC_ENDFUN:     fprintf(stderr, "TAC_ENDFUN"); break;
+    case TAC_FUNCALL:    fprintf(stderr, "TAC_FUNCALL"); break;
+    case TAC_FUNC_ARG:   fprintf(stderr, "TAC_FUNC_ARG"); break;
+    case TAC_VEC_ACCESS: fprintf(stderr, "TAC_VEC_ACCESS"); break;
     default: fprintf(stderr, "TAC_UNDEFINED"); break;
   }
   
@@ -280,6 +282,11 @@ TAC* generateCode(AST* node)
       result = createAttribution(node->son[0]->symbol, code[1]);
       break;
 
+    // O ->res é o vetor, o ->op1 é o índice, e o ->op2 é o valor a ser salvo nessa posição do vetor
+    case AST_ATRIBUITION_VEC:  
+      result = tacJoin(code[1], tacJoin(code[2], tacCreate(TAC_COPY_VEC, node->son[0]->symbol, code[1]->res, code[2]->res)));       
+      break;
+
     case AST_FUNC_VOID_DEC:  
       result = createFunc(node->son[0]->symbol, code[2]);
       break;
@@ -317,9 +324,15 @@ TAC* generateCode(AST* node)
       result = createLoop(node->son[0]->symbol, code[1], code[2], code[3], code[4]);
       break;
 
+    // O ->res é a variável temporária onde a execução da função, o ->op1, vai ser depositado
     case AST_FUNC_CALL: ;
       HASH_NODE* func_return_temp = makeTemp();
       result = tacCreate(TAC_FUNCALL, func_return_temp, code[0]->res, 0);
+      break;
+
+    case AST_VECTOR_ACCESS: ;
+      HASH_NODE* access_vector_temp = makeTemp();
+      result = tacJoin(code[1], tacCreate(TAC_VEC_ACCESS, access_vector_temp, code[0]->res, code[1]->res));
       break;
 
     case AST_FUNC_PARAMS_CALL: ;

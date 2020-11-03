@@ -22,6 +22,7 @@ enum
   TAC_NOT,
   TAC_MINUS,
   TAC_COPY,
+  TAC_COPY_VEC,
   TAC_IF,
   TAC_IF_ELSE,
   TAC_JMP,
@@ -35,6 +36,7 @@ enum
   TAC_ENDFUN,
   TAC_FUNCALL,
   TAC_FUNC_ARG,
+  TAC_VEC_ACCESS,
 };
 
 typedef struct tac_node 
