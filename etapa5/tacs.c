@@ -20,45 +20,45 @@ void tacPrint(TAC* tac)
 {
   if (!tac || tac->type == TAC_SYMBOL) return;
 
-  fprintf(stderr, "TAC(");
+  printf("TAC(");
   switch (tac->type)
   {
-    case TAC_SYMBOL:     fprintf(stderr, "TAC_SYMBOL");  break;
-    case TAC_ADD:        fprintf(stderr, "TAC_ADD");  break;
-    case TAC_SUB:        fprintf(stderr, "TAC_SUB");  break;
-    case TAC_DIV:        fprintf(stderr, "TAC_DIV");  break;
-    case TAC_MULT:       fprintf(stderr, "TAC_MULT");  break;
-    case TAC_GREATER:    fprintf(stderr, "TAC_GREATER");  break;
-    case TAC_LESSER:     fprintf(stderr, "TAC_LESSER");  break;
-    case TAC_OR:         fprintf(stderr, "TAC_OR");  break;
-    case TAC_AND:        fprintf(stderr, "TAC_AND");  break;
-    case TAC_DIF:        fprintf(stderr, "TAC_DIF");  break;
-    case TAC_EQ:         fprintf(stderr, "TAC_EQ");  break;
-    case TAC_GE:         fprintf(stderr, "TAC_GE");  break;
-    case TAC_LE:         fprintf(stderr, "TAC_LE");  break;
-    case TAC_NOT:        fprintf(stderr, "TAC_NOT");  break;
-    case TAC_MINUS:      fprintf(stderr, "TAC_MINUS");  break;
-    case TAC_COPY:       fprintf(stderr, "TAC_COPY"); break;
-    case TAC_COPY_VEC:   fprintf(stderr, "TAC_COPY_VEC"); break;
-    case TAC_JMP:        fprintf(stderr, "TAC_JMP"); break;
-    case TAC_JMP_FALSE:  fprintf(stderr, "TAC_JMP_FALSE"); break;
-    case TAC_LABEL:      fprintf(stderr, "TAC_LABEL"); break;
-    case TAC_PRINT:      fprintf(stderr, "TAC_PRINT"); break;
-    case TAC_RETURN:     fprintf(stderr, "TAC_RETURN"); break;
-    case TAC_READ:       fprintf(stderr, "TAC_READ"); break;
-    case TAC_WHILE:      fprintf(stderr, "TAC_WHILE"); break;
-    case TAC_BEGINFUN:   fprintf(stderr, "TAC_BEGINFUN"); break;
-    case TAC_ENDFUN:     fprintf(stderr, "TAC_ENDFUN"); break;
-    case TAC_FUNCALL:    fprintf(stderr, "TAC_FUNCALL"); break;
-    case TAC_FUNC_ARG:   fprintf(stderr, "TAC_FUNC_ARG"); break;
-    case TAC_VEC_ACCESS: fprintf(stderr, "TAC_VEC_ACCESS"); break;
-    default: fprintf(stderr, "TAC_UNDEFINED"); break;
+    case TAC_SYMBOL:     printf("TAC_SYMBOL");  break;
+    case TAC_ADD:        printf("TAC_ADD");  break;
+    case TAC_SUB:        printf("TAC_SUB");  break;
+    case TAC_DIV:        printf("TAC_DIV");  break;
+    case TAC_MULT:       printf("TAC_MULT");  break;
+    case TAC_GREATER:    printf("TAC_GREATER");  break;
+    case TAC_LESSER:     printf("TAC_LESSER");  break;
+    case TAC_OR:         printf("TAC_OR");  break;
+    case TAC_AND:        printf("TAC_AND");  break;
+    case TAC_DIF:        printf("TAC_DIF");  break;
+    case TAC_EQ:         printf("TAC_EQ");  break;
+    case TAC_GE:         printf("TAC_GE");  break;
+    case TAC_LE:         printf("TAC_LE");  break;
+    case TAC_NOT:        printf("TAC_NOT");  break;
+    case TAC_MINUS:      printf("TAC_MINUS");  break;
+    case TAC_COPY:       printf("TAC_COPY"); break;
+    case TAC_COPY_VEC:   printf("TAC_COPY_VEC"); break;
+    case TAC_JMP:        printf("TAC_JMP"); break;
+    case TAC_JMP_FALSE:  printf("TAC_JMP_FALSE"); break;
+    case TAC_LABEL:      printf("TAC_LABEL"); break;
+    case TAC_PRINT:      printf("TAC_PRINT"); break;
+    case TAC_RETURN:     printf("TAC_RETURN"); break;
+    case TAC_READ:       printf("TAC_READ"); break;
+    case TAC_WHILE:      printf("TAC_WHILE"); break;
+    case TAC_BEGINFUN:   printf("TAC_BEGINFUN"); break;
+    case TAC_ENDFUN:     printf("TAC_ENDFUN"); break;
+    case TAC_FUNCALL:    printf("TAC_FUNCALL"); break;
+    case TAC_FUNC_ARG:   printf("TAC_FUNC_ARG"); break;
+    case TAC_VEC_ACCESS: printf("TAC_VEC_ACCESS"); break;
+    default: printf("TAC_UNDEFINED"); break;
   }
   
-  fprintf(stderr, ", %s", (tac->res) ? tac->res->text : "0");
-  fprintf(stderr, ", %s", (tac->op1) ? tac->op1->text : "0");
-  fprintf(stderr, ", %s", (tac->op2) ? tac->op2->text : "0");
-  fprintf(stderr, ");\n");
+  printf(", %s", (tac->res) ? tac->res->text : "0");
+  printf(", %s", (tac->op1) ? tac->op1->text : "0");
+  printf(", %s", (tac->op2) ? tac->op2->text : "0");
+  printf(");\n");
   
 }
 

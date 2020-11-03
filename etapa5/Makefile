@@ -55,56 +55,11 @@ test-ast_generation:
 	diff tests/ast-generation/output.txt tests/ast-generation/final.txt
 	rm tests/ast-generation/output.txt tests/ast-generation/final.txt  
 
-test-variables:
-	- ./etapa4 tests/semantic_verification/variables/basic_input.txt out.txt > tests/semantic_verification/variables/basic_result.txt    
-	diff tests/semantic_verification/variables/basic_expected.txt tests/semantic_verification/variables/basic_result.txt  
+test_bool_arithm:
+	- ./etapa5 tests/tac_generation/arithmetic_boolean_operations/basic_input.txt out.txt > tests/tac_generation/arithmetic_boolean_operations/basic_result.txt
+	diff tests/tac_generation/arithmetic_boolean_operations/basic_expected.txt tests/tac_generation/arithmetic_boolean_operations/basic_result.txt
 
-test-vector_dec:
-	- ./etapa4 tests/semantic_verification/vector_dec/basic_input.txt out.txt > tests/semantic_verification/vector_dec/basic_result.txt    
-	diff tests/semantic_verification/vector_dec/basic_expected.txt tests/semantic_verification/vector_dec/basic_result.txt  
-
-test-arithm_bool_ops:
-	- ./etapa4 tests/semantic_verification/arithmetic_boolean_operations/basic_input.txt out.txt > tests/semantic_verification/arithmetic_boolean_operations/basic_result.txt    
-	diff tests/semantic_verification/arithmetic_boolean_operations/basic_expected.txt tests/semantic_verification/arithmetic_boolean_operations/basic_result.txt  
-
-test-identifier_access:
-	- ./etapa4 tests/semantic_verification/identifier_access/basic_input.txt out.txt > tests/semantic_verification/identifier_access/basic_result.txt    
-	diff tests/semantic_verification/identifier_access/basic_expected.txt tests/semantic_verification/identifier_access/basic_result.txt  
-
-test-atribuition_identifier_access:
-	- ./etapa4 tests/semantic_verification/atribuition_identifier_access/basic_input.txt out.txt > tests/semantic_verification/atribuition_identifier_access/basic_result.txt    
-	diff tests/semantic_verification/atribuition_identifier_access/basic_expected.txt tests/semantic_verification/atribuition_identifier_access/basic_result.txt  
-
-test-if_clausule:
-	- ./etapa4 tests/semantic_verification/if_clausule/basic_input.txt out.txt > tests/semantic_verification/if_clausule/basic_result.txt    
-	diff tests/semantic_verification/if_clausule/basic_expected.txt tests/semantic_verification/if_clausule/basic_result.txt  
-
-test-while_clausule:
-	- ./etapa4 tests/semantic_verification/while_clausule/basic_input.txt out.txt > tests/semantic_verification/while_clausule/basic_result.txt    
-	diff tests/semantic_verification/while_clausule/basic_expected.txt tests/semantic_verification/while_clausule/basic_result.txt  
-
-test-func_void_call:
-	- ./etapa4 tests/semantic_verification/func_void_call/basic_input.txt out.txt > tests/semantic_verification/func_void_call/basic_result.txt    
-	diff tests/semantic_verification/func_void_call/basic_expected.txt tests/semantic_verification/func_void_call/basic_result.txt  
-
-test-local_parameters_repetition_func:
-	- ./etapa4 tests/semantic_verification/local_parameters_repetition_func/basic_input.txt out.txt > tests/semantic_verification/local_parameters_repetition_func/basic_result.txt    
-	diff tests/semantic_verification/local_parameters_repetition_func/basic_expected.txt tests/semantic_verification/local_parameters_repetition_func/basic_result.txt  
-
-test-func_params_call:
-	- ./etapa4 tests/semantic_verification/func_params_call/basic_input.txt out.txt > tests/semantic_verification/func_params_call/basic_result.txt    
-	diff tests/semantic_verification/func_params_call/basic_expected.txt tests/semantic_verification/func_params_call/basic_result.txt  
-
-test-local_variables:
-	- ./etapa4 tests/semantic_verification/local_variables/basic_input.txt out.txt > tests/semantic_verification/local_variables/basic_result.txt    
-	diff tests/semantic_verification/local_variables/basic_expected.txt tests/semantic_verification/local_variables/basic_result.txt  
-
-test-func_types_compatibility:
-	- ./etapa4 tests/semantic_verification/func_types_compatibility/basic_input.txt out.txt > tests/semantic_verification/func_types_compatibility/basic_result.txt    
-	diff tests/semantic_verification/func_types_compatibility/basic_expected.txt tests/semantic_verification/func_types_compatibility/basic_result.txt  
-
-test_semantic_verification: test-variables test-vector_dec test-arithm_bool_ops test-identifier_access test-atribuition_identifier_access test-if_clausule test-while_clausule test-func_void_call test-local_parameters_repetition_func test-func_params_call test-local_variables test-func_types_compatibility
-
+test: test_bool_arithm
 
 tar:
 	- tar cvzf $(ETAPA).tgz .

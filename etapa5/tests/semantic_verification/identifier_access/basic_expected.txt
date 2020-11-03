@@ -1,9 +1,0 @@
-Semantic Error: using identifier v1f that's not variable neither literal
-Semantic Error: using identifier v1f that's not variable neither literal
-Semantic Error: using identifier v2f that's not variable neither literal
-Semantic Error: using identifier v2f that's not variable neither literal
-Semantic Error: variable v3f must be accessed as a vector 
-Semantic Error: identifier fun does not belong to a variable 
-Semantic Error: identifier fun does not belong to a vector 
-Semantic Error: forbidden access to f1 with index, only allowed for vectors 
-Compilation ERROR! 

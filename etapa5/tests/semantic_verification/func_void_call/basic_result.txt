@@ -1,7 +1,0 @@
-Semantic Error: invalid value type for cf1 atribuition 
-Semantic Error: invalid value type for if1 atribuition 
-Semantic Error: invalid value type for ff1 atribuition 
-Semantic Error: invalid value type for bf1 atribuition 
-Semantic Error: invalid value type for bf2 atribuition 
-Semantic Error: invalid value type for bf3 atribuition 
-Compilation ERROR! 

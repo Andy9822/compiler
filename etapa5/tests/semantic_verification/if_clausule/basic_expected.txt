@@ -1,6 +1,0 @@
-Semantic Error: if clausule needs to be a boolean expression
-Semantic Error: if clausule needs to be a boolean expression
-Semantic Error: if clausule needs to be a boolean expression
-Semantic Error: if clausule needs to be a boolean expression
-Semantic Error: if clausule needs to be a boolean expression
-Compilation ERROR! 

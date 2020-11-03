@@ -1,8 +1,0 @@
-Semantic Error: if clausule needs to be a boolean expression
-Semantic Error: if clausule needs to be a boolean expression
-Semantic Error: forbidden access to f with index, only allowed for vectors 
-Semantic Error: if clausule needs to be a boolean expression
-Semantic Error: forbidden access to f with index, only allowed for vectors 
-Semantic Error: if clausule needs to be a boolean expression
-Semantic Error: if clausule needs to be a boolean expression
-Compilation ERROR! 
