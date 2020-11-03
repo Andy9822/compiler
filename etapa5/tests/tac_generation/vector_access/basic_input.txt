@@ -1,0 +1,22 @@
+a = char : 0FA.4;
+b = char : 0FA.4;
+i = int : 0FA.4;
+c = char : 0FA.4;
+f = float : 0FA.4;
+d = bool : TRUE;
+
+vec = char[4];
+fv = float[1];
+
+
+fun () = int 
+{
+   a = vec[0]
+   a = vec[c * i - a]
+   vec[a / a] = 5 + 5
+   vec[a / a] = vec[a / a + 1]
+   c = vec[vec[0]]
+   vec[vec[0]] = vec[vec[1]]
+};
+
+bv = bool[1645];
