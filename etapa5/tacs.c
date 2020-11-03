@@ -23,16 +23,28 @@ void tacPrint(TAC* tac)
   fprintf(stderr, "TAC(");
   switch (tac->type)
   {
-    case TAC_SYMBOL:  fprintf(stderr, "TAC_SYMBOL");  break;
-    case TAC_ADD:  fprintf(stderr, "TAC_ADD");  break;
-    case TAC_SUB: fprintf(stderr, "TAC_SUB"); break;
-    case TAC_COPY: fprintf(stderr, "TAC_COPY"); break;
-    case TAC_JMP: fprintf(stderr, "TAC_JMP"); break;
+    case TAC_SYMBOL:    fprintf(stderr, "TAC_SYMBOL");  break;
+    case TAC_ADD:       fprintf(stderr, "TAC_ADD");  break;
+    case TAC_SUB:       fprintf(stderr, "TAC_SUB");  break;
+    case TAC_DIV:       fprintf(stderr, "TAC_DIV");  break;
+    case TAC_MULT:      fprintf(stderr, "TAC_MULT");  break;
+    case TAC_GREATER:   fprintf(stderr, "TAC_GREATER");  break;
+    case TAC_LESSER:    fprintf(stderr, "TAC_LESSER");  break;
+    case TAC_OR:        fprintf(stderr, "TAC_OR");  break;
+    case TAC_AND:       fprintf(stderr, "TAC_AND");  break;
+    case TAC_DIF:       fprintf(stderr, "TAC_DIF");  break;
+    case TAC_EQ:        fprintf(stderr, "TAC_EQ");  break;
+    case TAC_GE:        fprintf(stderr, "TAC_GE");  break;
+    case TAC_LE:        fprintf(stderr, "TAC_LE");  break;
+    case TAC_NOT:       fprintf(stderr, "TAC_NOT");  break;
+    case TAC_MINUS:     fprintf(stderr, "TAC_MINUS");  break;
+    case TAC_COPY:      fprintf(stderr, "TAC_COPY"); break;
+    case TAC_JMP:       fprintf(stderr, "TAC_JMP"); break;
     case TAC_JMP_FALSE: fprintf(stderr, "TAC_JMP_FALSE"); break;
-    case TAC_LABEL: fprintf(stderr, "TAC_LABEL"); break;
-    case TAC_PRINT: fprintf(stderr, "TAC_PRINT"); break;
-    case TAC_READ: fprintf(stderr, "TAC_READ"); break;
-    case TAC_WHILE: fprintf(stderr, "TAC_WHILE"); break;
+    case TAC_LABEL:     fprintf(stderr, "TAC_LABEL"); break;
+    case TAC_PRINT:     fprintf(stderr, "TAC_PRINT"); break;
+    case TAC_READ:      fprintf(stderr, "TAC_READ"); break;
+    case TAC_WHILE:     fprintf(stderr, "TAC_WHILE"); break;
     default: fprintf(stderr, "TAC_UNDEFINED"); break;
   }
   
@@ -72,6 +84,21 @@ TAC* tacJoin(TAC* l1, TAC* l2)
 
 
 // ############################# Code generation helpers #############################
+TAC* createAttribution(HASH_NODE* symbol, TAC* code_expr)
+{
+  return tacJoin(code_expr, tacCreate(TAC_COPY, symbol, code_expr->res, 0)); 
+}
+
+TAC* createBoolenArithmetic2Operands(int tac_operation, TAC* code0, TAC* code1)
+{
+  return  tacJoin(tacJoin(code0, code1), tacCreate(tac_operation, makeTemp(), code0->res, code1->res)); 
+}
+
+TAC* createNegation(int tac_operation, TAC* code0)
+{
+  return  tacJoin(code0, tacCreate(tac_operation, makeTemp(), code0->res, 0)); 
+}
+
 TAC* createIf(TAC* code0, TAC* code1)
 {
   TAC* jmp_tac = 0;
@@ -121,6 +148,51 @@ TAC* createWhile(TAC* code0, TAC* code1)
 
   return tacJoin(label_begin_tac, tacJoin(jmp_false_tac, label_end_tac));
 
+}
+
+TAC* createLoop(HASH_NODE* symbol, TAC* code_expr_start, TAC* code_expr_end, TAC* code_expr_step, TAC* code_cmd)
+{
+  //Attribution for start expression
+  TAC* tac_expr_start = createAttribution(symbol, code_expr_start); 
+
+  // We need to jump to the end of the loop block in case clausule is false
+  TAC* jmp_false_tac = 0;
+  TAC* label_end_tac = 0;
+  HASH_NODE* end_label = 0;
+  end_label = makeLabel();
+
+  // We need a label at the beggining of the loop block to be able to jump back and test the clausule, therefore being able to iterate or leave the loop
+  TAC* jmp_begin_tac = 0;
+  TAC* label_begin_tac = 0;
+  HASH_NODE* beggining_label = 0;
+  beggining_label = makeLabel();
+
+  // We create the beggining label right after the starting attribution 
+  label_begin_tac = tacCreate(TAC_LABEL, beggining_label, 0, 0);
+  label_begin_tac->prev = tac_expr_start;
+
+  // We create a jump to the end in case clausule is false
+  jmp_false_tac = tacCreate(TAC_JMP_FALSE, end_label, code_expr_end->res, 0);
+  jmp_false_tac->prev = code_expr_end;
+
+  // Right after the command block we manually update our identifier with our "step expression"
+  HASH_NODE* temp_add = makeTemp();
+  TAC* tac_add_expr = tacCreate(TAC_ADD, temp_add, symbol, code_expr_step->res);
+  tac_add_expr->prev = code_expr_step;
+  TAC* tac_update_expr = tacCreate(TAC_COPY, symbol, temp_add, 0);
+  tac_update_expr->prev = tac_add_expr;
+
+  // We create a jump to the beggining right after the command block
+  jmp_begin_tac = tacCreate(TAC_JMP, beggining_label, 0, 0);
+  jmp_begin_tac->prev = tac_update_expr;
+
+  // We create the end label at the end of all commands 
+  label_end_tac = tacCreate(TAC_LABEL, end_label, 0, 0);
+  label_end_tac->prev = jmp_begin_tac;
+
+
+
+  return tacJoin(label_begin_tac, tacJoin(jmp_false_tac, tacJoin(code_cmd, label_end_tac)));
 }
 
 TAC* createIfElse(TAC* code0, TAC* code1, TAC* code2)
@@ -177,14 +249,25 @@ TAC* generateCode(AST* node)
     case AST_SYMBOL:   
       result = tacCreate(TAC_SYMBOL, node->symbol, 0, 0); 
       break;
+    
+    case AST_ADD: result = createBoolenArithmetic2Operands(TAC_ADD, code[0], code[1]); break;
+    case AST_SUB: result = createBoolenArithmetic2Operands(TAC_SUB, code[0], code[1]); break;
+    case AST_DIV: result = createBoolenArithmetic2Operands(TAC_DIV, code[0], code[1]); break;
+    case AST_MULT: result = createBoolenArithmetic2Operands(TAC_MULT, code[0], code[1]); break;
+    case AST_GREATER: result = createBoolenArithmetic2Operands(TAC_GREATER, code[0], code[1]); break;
+    case AST_LESSER: result = createBoolenArithmetic2Operands(TAC_LESSER, code[0], code[1]); break;
+    case AST_OR: result = createBoolenArithmetic2Operands(TAC_OR, code[0], code[1]); break;
+    case AST_AND: result = createBoolenArithmetic2Operands(TAC_AND, code[0], code[1]); break;
+    case AST_DIF: result = createBoolenArithmetic2Operands(TAC_DIF, code[0], code[1]); break;
+    case AST_EQ: result = createBoolenArithmetic2Operands(TAC_EQ, code[0], code[1]); break;
+    case AST_GE: result = createBoolenArithmetic2Operands(TAC_GE, code[0], code[1]); break;
+    case AST_LE: result = createBoolenArithmetic2Operands(TAC_LE, code[0], code[1]); break;
 
-    // TODO: call binary_operation() function passing "TAC_ADD" option to reuse code
-    case AST_ADD:      
-      result = tacJoin(tacJoin(code[0], code[1]), tacCreate(TAC_ADD, makeTemp(), code[0]->res, code[1]->res)); 
-      break; //Use optional chaining if segfault appears
+    case AST_NOT: result = createNegation(TAC_NOT, code[0]); break;
+    case AST_MINUS: result = createNegation(TAC_MINUS, code[0]); break;
     
     case AST_ATRIBUITION:  
-      result = tacJoin(code[1], tacCreate(TAC_COPY, node->son[0]->symbol, code[1]->res, 0)); 
+      result = createAttribution(node->son[0]->symbol, code[1]);
       break;
     
     case AST_PRINTCMD:
@@ -207,6 +290,10 @@ TAC* generateCode(AST* node)
     
     case AST_WHILE:  
       result = createWhile(code[0], code[1]); 
+      break;
+
+    case AST_LOOP:  
+      result = createLoop(node->son[0]->symbol, code[1], code[2], code[3], code[4]);
       break;
 
     default:           
