@@ -354,3 +354,14 @@ TAC* generateCode(AST* node)
   return result;
 }
 
+TAC* tacReverse(TAC* tac)
+{
+  TAC* t = tac;
+
+  for (t = tac; t->prev; t = t->prev)
+  {
+    t->prev->next = t;
+  }
+
+  return t;
+}

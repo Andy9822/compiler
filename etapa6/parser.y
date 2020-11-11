@@ -4,6 +4,7 @@
     int getLineNumber(void);
     int yylex();    // TODO find better workaround
     AST* Root = NULL;
+    TAC* TAC_code = NULL;
 %}
 
 %union
@@ -86,7 +87,7 @@ int yyerror();
 
 %%
 
-programa: declist {$$ = $1; Root = $$; check_and_set_declarations(Root); check_operands(Root, 0); check_undeclared(); tacPrintBackwards(generateCode($1));}
+programa: declist {$$ = $1; Root = $$; check_and_set_declarations(Root); check_operands(Root, 0); check_undeclared(); TAC_code=generateCode($1); tacPrintBackwards(TAC_code); TAC_code=tacReverse(TAC_code);}
     ;
 
 declist: vardec ';' declist {$$ = astCreate( AST_DECLIST, NULL, $1, $3, NULL, NULL, NULL); /*astPrint($1, 0);*/}

@@ -9,11 +9,14 @@
 
 ETAPA=etapa6
 
-etapa3:  main.o y.tab.o lex.yy.o hash.o ast.o decompiler.o semantic.o type_inference.o tacs.o
-	gcc  main.o y.tab.o lex.yy.o hash.o ast.c decompiler.c semantic.c type_inference.c tacs.c -o $(ETAPA)
+etapa3:  main.o y.tab.o lex.yy.o hash.o ast.o decompiler.o semantic.o type_inference.o tacs.o asm.o
+	gcc  main.o y.tab.o lex.yy.o hash.o ast.c decompiler.c semantic.c type_inference.c tacs.c asm.c -o $(ETAPA)
 
 main.o: main.c
 	gcc -c main.c
+
+asm.o: asm.c
+	gcc -c asm.c
 
 tacs.o: tacs.c
 	gcc -c tacs.c

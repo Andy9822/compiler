@@ -1,8 +1,5 @@
 #include "hash.h"
 
-
-HASH_NODE *HASH_TABLE[HASH_SIZE];
-
 void hash_init() {
   int i;
   for (i = 0; i < HASH_SIZE; i++) {

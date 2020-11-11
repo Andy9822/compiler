@@ -49,6 +49,7 @@ typedef struct hash_node {
   struct local_variable * scope_variables;
 } HASH_NODE;
 
+HASH_NODE *HASH_TABLE[HASH_SIZE];
 
 void hash_init();
 int hashString(char string[]);

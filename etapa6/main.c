@@ -2,9 +2,11 @@
 #include <stdlib.h>
 #include "hash.h"
 #include "decompiler.h"
+#include "asm.h"
 
 extern FILE *yyin;
 extern AST *Root;
+extern TAC *TAC_code;
 unsigned long long int SemanticErrors;
 
 int yyparse();
@@ -68,10 +70,8 @@ int main(int argc, char **argv) {
     return 4;
   }
 
-  else 
-  {
-    printf("Compilation successfull! \n");
-  }
-  // printf("SemanticErrors: %d! \n", SemanticErrors);
+  generateASM(TAC_code);
+
+  printf("Compilation successfull! \n");
   return 0;
 }
