@@ -1,9 +1,10 @@
 #include "asm.h"
+#include "hash.h"
 #include "tacs.h"
 #include "type_inference.h"
 
 
-int isCharInitValue(char* string)
+int isCharValue(char* string)
 {
     if (string[0] == '\'')
     {
@@ -33,7 +34,7 @@ void generateNormalVariable(HASH_NODE* node,FILE* fout)
 {
     if (isNumberType(node->data_type))
     {
-        if (isCharInitValue(node->init_value))
+        if (isCharValue(node->init_value))
         {
             fprintf(fout, "_%s:\t.long\t%i\n", node->text, node->init_value[1]);
         }
@@ -80,6 +81,82 @@ void generateGlobalVariables(FILE* fout)
   }
   
   fprintf(fout, "\n");
+}
+
+void copyFloatLiteralToCharIntVariable(TAC* tac, FILE* fout)
+{
+    int tamanho = strlen(tac->op1->text) + 1; // add \0 position
+    int vectorSize = tamanho + 2 + 2; // consider 0x and p0 
+    char floatString[vectorSize]; 
+    floatString[0] = '0';
+    floatString[1] = 'x';
+
+    // If it starts with 0 we have to ignore it
+    int offsetFloatLiteral = (tac->op1->text[0] == '0') ? 1 : 0;
+    strcpy(floatString + 2, (tac->op1->text) + offsetFloatLiteral);
+
+    floatString[vectorSize - 3] = 'p';
+    floatString[vectorSize - 2] = '0';
+    floatString[vectorSize - 1] = '\0';
+
+    // Convert float bits to integer
+    float floatNumber = strtod(floatString, NULL);
+    int floatInInteger;
+    memcpy(&floatInInteger, &floatNumber, sizeof(float));
+
+    // Passa o valor hexa float constante para o eax para poder depois mover para  xmm0  
+    // faz  tcvttss2sil sobre xmm0 para eax | salva valor eax na variavel
+    // TODO remover esses 2 prints
+    // printf("%s recebe %f\n", tac->res->text, floatNumber);
+    // printf("%s recebe %d\n", tac->res->text, floatInInteger);
+    fprintf(fout, "\tmovl	$%d, %%eax\n", floatInInteger);
+    fprintf(fout, "\tmovd	%%eax, %%xmm0\n");
+    fprintf(fout, "\tcvttss2sil	%%xmm0, %%eax\n");
+    fprintf(fout, "\tmovl     %%eax, _%s(%%rip)\n", tac->res->text);
+}
+
+void processCopy(TAC* tac, FILE* fout) 
+{
+    switch (tac->res->data_type)
+    {
+    case DATATYPE_CHAR:
+    case DATATYPE_INT:
+        if (tac->op1->type == SYMBOL_LIT_INTEGER || tac->op1->type == SYMBOL_LIT_CHAR)
+        {
+            // Se valor for inteiro, faz strtol com base 16. Se for char, só pega o caractere mesmo
+            int value = tac->op1->type == SYMBOL_LIT_INTEGER ? strtol(tac->op1->text, NULL, 16) : tac->op1->text[1];
+            fprintf(fout, "\tmovl\t$%d, %s(%%rip) \n", value, tac->res->text);
+        }
+        else if (tac->op1->type == SYMBOL_LIT_FLOAT)
+        {
+            copyFloatLiteralToCharIntVariable(tac, fout);
+        }
+        else if(tac->op1->type == SYMBOL_VARIABLE)
+        {
+            if (tac->op1->data_type == DATATYPE_CHAR || tac->op1->data_type == DATATYPE_INT)
+            {
+                printf("char/int recebendo char int sussa \n");
+                fprintf(fout, "\tmovl	_%s(%%rip), %%eax\n", tac->op1->text);
+                fprintf(fout, "\tmovl	%%eax, _%s(%%rip)\n", tac->op1->text);
+               
+            }
+        }
+        
+        
+        // SYMBOL_VARIABLE
+        break;
+    
+    case DATATYPE_FLOAT:
+        /* code */
+        break;
+    
+    case DATATYPE_BOOL:
+        /* code */
+        break;
+    
+    default:
+        break;
+    }
 }
 
 void generateASM(TAC* first)
@@ -145,6 +222,10 @@ void generateASM(TAC* first)
           break;
         }
       break;
+    
+    case TAC_COPY:
+        processCopy(tac, fout);
+        break;
     
     default:
       break;
