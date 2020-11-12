@@ -49,6 +49,8 @@ void check_and_set_declarations(AST *node)
             
             node->son[0]->son[0]->symbol->type = SYMBOL_VARIABLE;
             node->son[0]->son[0]->symbol->data_type = getDatatypeFromSymbol(node->son[0]->son[1]->symbol->type);
+            node->son[0]->son[0]->symbol->init_value = node->son[1]->symbol->text;
+            
             break;
 
         case AST_VEC_INIT:

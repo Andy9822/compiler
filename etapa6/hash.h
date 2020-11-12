@@ -45,6 +45,7 @@ typedef struct hash_node {
   int type;
   int data_type;
   char *text;
+  char* init_value;
   struct hash_node *next;
   struct local_variable * scope_variables;
 } HASH_NODE;

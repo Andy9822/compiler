@@ -48,6 +48,7 @@ HASH_NODE * hashInsert(char string[], int type) {
     new_node->text = strcpy(new_node->text, string);
     new_node->next = HASH_TABLE[index];
     new_node->scope_variables = NULL;
+    new_node->init_value = NULL;
     HASH_TABLE[index] = new_node;
   }
   
