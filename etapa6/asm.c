@@ -9,6 +9,22 @@ void intRegisterToVariable(char* varName, FILE* fout)
     fprintf(fout, "\tmovl	%%eax, _%s(%%rip)\n", varName);
 }
 
+void intNumToRegister(long int value, FILE* fout)
+{
+    fprintf(fout, "\tmovl	$%li, %%eax\n", value);
+}
+
+void intNumToVar(char* varName, long int value, FILE* fout)
+{
+    intNumToRegister(value, fout);
+    intRegisterToVariable(varName, fout);
+}
+
+void intVarToRegister(char* varName, FILE* fout)
+{
+    fprintf(fout, "\tmovl	_%s(%%rip), %%eax\n", varName);
+}
+
 void callPrintFunction(char* printFuncName, FILE* fout)
 {
     fprintf(fout, "\tleaq	%s(%%rip), %%rdi\n", printFuncName);
@@ -33,7 +49,7 @@ void floatVarToFloatRegister(char* varName, int registerNumber, FILE* fout)
 
 void intNumToFloatRegister(long int value, int registerNumber, FILE* fout)
 {
-    fprintf(fout, "\tmovl	$%li, %%eax\n", value);
+    intNumToRegister(value, fout);
     intRegisterToFloatRegister(registerNumber, fout);
 }
 
@@ -177,6 +193,20 @@ void copyToFloatVar(TAC* tac, FILE* fout)
         }
     }
 }
+void copyToBoolVar(TAC* tac, FILE* fout)
+{
+    if (isBoolLiteral(tac->op1->type))
+    {
+        // Se valor for inteiro, faz strtol com base 16. Se for char, só pega o caractere mesmo
+        int bool_value = (strcmp(tac->op1->text, "TRUE") == 0) ? 1 : 0;
+        intNumToVar(tac->res->text, bool_value, fout);
+    }
+    else if (tac->op1->type == SYMBOL_VARIABLE)
+    {
+        intVarToRegister(tac->op1->text, fout);
+        intRegisterToVariable(tac->res->text, fout);
+    }
+}
 
 void processCopy(TAC* tac, FILE* fout) 
 {
@@ -194,7 +224,7 @@ void processCopy(TAC* tac, FILE* fout)
             break;
         
         case DATATYPE_BOOL:
-            /* code */
+            copyToBoolVar(tac, fout);
             break;
         
         default:
