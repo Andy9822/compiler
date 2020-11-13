@@ -218,6 +218,11 @@ void processOperandToFloatRegister(HASH_NODE* op, int registerNumber, FILE* fout
         long int op_value = strtol(op->text, NULL, 16);
         intNumToFloatRegister(op_value, registerNumber, fout);
     }
+    else if (isBoolLiteral(op->type))
+    {
+        int bool_value = (strcmp(op->text, "TRUE") == 0) ? 1 : 0;
+        intNumToFloatRegister(bool_value, registerNumber, fout);
+    }
     else if (op->type == SYMBOL_LIT_FLOAT)
     {
         long int floatInInteger = castFloatHexStringToInt(op->text);
@@ -229,7 +234,7 @@ void processOperandToFloatRegister(HASH_NODE* op, int registerNumber, FILE* fout
         {
             floatVarToFloatRegister(op->text, registerNumber, fout);
         }
-        else if (isIntVariable(op->data_type))
+        else if (isIntVariable(op->data_type) || op->data_type == DATATYPE_BOOL)
         {
             intVarToFloatRegister(op->text, registerNumber, fout);
         }
@@ -248,37 +253,19 @@ void copyToFloatVar(TAC* tac, FILE* fout)
     saveFloatRegisterToFloatVar(tac->res->text, fout);
 }
 
-void copyToBoolVar(TAC* tac, FILE* fout)
-{
-    if (isBoolLiteral(tac->op1->type))
-    {
-        // Se valor for inteiro, faz strtol com base 16. Se for char, só pega o caractere mesmo
-        int bool_value = (strcmp(tac->op1->text, "TRUE") == 0) ? 1 : 0;
-        intNumToVar(tac->res->text, bool_value, fout);
-    }
-    else if (tac->op1->type == SYMBOL_VARIABLE)
-    {
-        floatVarToIntVar(tac->op1->text, tac->res->text, DEFAULT_REGISTER, fout);
-    }
-}
-
 void processCopy(TAC* tac, FILE* fout) 
 {
     switch (tac->res->data_type)
     {
         case DATATYPE_CHAR:
         case DATATYPE_INT:
+        case DATATYPE_BOOL:
             copyToIntVar(tac, fout);
-            // SYMBOL_VARIABLE
             break;
         
         case DATATYPE_FLOAT:
         case DATATYPE_TEMP_FLOAT:
             copyToFloatVar(tac, fout);
-            break;
-        
-        case DATATYPE_BOOL:
-            copyToBoolVar(tac, fout);
             break;
         
         default:
@@ -299,7 +286,7 @@ void testAndZeroOperator(HASH_NODE* op, FILE* fout)
     }
 }
 
-void processAndOr(TAC* tac, int zeroValue, int notZeroValue, FILE* fout)
+void processOr(TAC* tac, FILE* fout)
 {
     int labelNotZero = actualLabel++;
     int labelEnd = actualLabel++;
@@ -312,23 +299,35 @@ void processAndOr(TAC* tac, int zeroValue, int notZeroValue, FILE* fout)
     testAndZeroOperator(tac->op2, fout);
     jumpNotZero(labelNotZero, fout);
 
-    intNumToFloatVar(tac->res->text, zeroValue, fout);
+    intNumToFloatVar(tac->res->text, 0, fout);
 	jump(labelEnd, fout);
 
     label(labelNotZero, fout);
-    intNumToFloatVar(tac->res->text, notZeroValue, fout);
+    intNumToFloatVar(tac->res->text, 1, fout);
 
     label(labelEnd, fout);
 }
 
-void processOr(TAC* tac, FILE* fout)
-{
-    processAndOr(tac, 0, 1, fout);
-}
-
 void processAnd(TAC* tac, FILE* fout)
 {
-    processAndOr(tac, 1, 0, fout);
+    int labelZero = actualLabel++;
+    int labelEnd = actualLabel++;
+
+    //Coloca op1 em xmm0 e compara com 0
+    testAndZeroOperator(tac->op1, fout);
+    jumpZero(labelZero, fout);
+
+    // # Coloca op2 em xmm0 e compara com 0;
+    testAndZeroOperator(tac->op2, fout);
+    jumpZero(labelZero, fout);
+
+    intNumToFloatVar(tac->res->text, 1, fout);
+	jump(labelEnd, fout);
+
+    label(labelZero, fout);
+    intNumToFloatVar(tac->res->text, 0, fout);
+
+    label(labelEnd, fout);
 }
 
 void compareOperators(HASH_NODE* op1, HASH_NODE* op2,FILE* fout)
@@ -395,6 +394,28 @@ void processGE(TAC* tac, FILE* fout)
 void processLE(TAC* tac, FILE* fout)
 {
     processGELE(tac, 0, 1, fout);
+}
+
+void processNot(TAC* tac, FILE* fout)
+{
+    int labelNotZero = actualLabel++;
+    int labelEnd = actualLabel++;
+
+    processOperandToFloatRegister(tac->op1, 0, fout);
+    intNumToFloatRegister(0, 1, fout);
+    compareFloatRegister(fout);
+
+    jumpNotZero(labelNotZero, fout);
+
+    intNumToFloatRegister(1, 0, fout);
+    saveFloatRegisterToFloatVar(tac->res->text, fout);
+    jump(labelEnd, fout);
+
+    label(labelNotZero, fout);
+    intNumToFloatRegister(0, 0, fout);
+    saveFloatRegisterToFloatVar(tac->res->text, fout);
+
+    label(labelEnd, fout);
 }
 
 void processArithmeticResult(char* resultVar, char* opName, FILE* fout) 
@@ -595,6 +616,10 @@ void generateASM(TAC* first)
     
     case TAC_LE:
         processLE(tac, fout);
+        break;
+    
+    case TAC_NOT:
+        processNot(tac, fout);
         break;
     
     default:
