@@ -85,10 +85,14 @@ void printWhiteLine(FILE* fout)
     fprintf(fout, "\n");
 }
 
-void testZeroFloatRegister( FILE* fout)
+void compareFloatRegister(FILE* fout)
+{
+    fprintf(fout, "\tucomiss	%%xmm0, %%xmm1\n");
+}
+void testZeroFloatRegister(FILE* fout)
 {
     fprintf(fout, "\tpxor	%%xmm1, %%xmm1\n");
-    fprintf(fout, "\tucomiss	%%xmm0, %%xmm1\n");
+    compareFloatRegister(fout);
 }
 
 void testZeroFloatVar(char* varName, FILE* fout)
@@ -183,6 +187,36 @@ void copyFloatLiteralToCharIntVariable(TAC* tac, FILE* fout)
     fprintf(fout, "\tmovd	%%eax, %%xmm0\n");
     fprintf(fout, "\tcvttss2sil	%%xmm0, %%eax\n");
     fprintf(fout, "\tmovl     %%eax, _%s(%%rip)\n", tac->res->text);
+}
+
+void operandToFloatRegister(HASH_NODE* op, int registerNumber, FILE* fout)
+{
+    if (op->type == SYMBOL_LIT_CHAR)
+    {
+        int op_value = op->text[1];
+        intNumToFloatRegister(op_value, registerNumber, fout);
+    }
+    else if (op->type == SYMBOL_LIT_INTEGER )
+    {
+        long int op_value = strtol(op->text, NULL, 16);
+        intNumToFloatRegister(op_value, registerNumber, fout);
+    }
+    else if (op->type == SYMBOL_LIT_FLOAT)
+    {
+        long int floatInInteger = castFloatHexStringToInt(op->text);
+        floatNumToFloatRegister(floatInInteger, registerNumber, fout);
+    }
+    else if (op->type == SYMBOL_VARIABLE)
+    {
+        if (isFloatVariable(op->data_type))
+        {
+            floatVarToFloatRegister(op->text, registerNumber, fout);
+        }
+        else if (isIntVariable(op->data_type))
+        {
+            intVarToFloatRegister(op->text, registerNumber, fout);
+        }
+    }
 }
 
 void copyToIntVar(TAC* tac, FILE* fout)
@@ -283,7 +317,7 @@ void processCopy(TAC* tac, FILE* fout)
     }
 }
 
-void testZeroAndOperator(HASH_NODE* op, FILE* fout)
+void testAndZeroOperator(HASH_NODE* op, FILE* fout)
 {
     if (op->type == SYMBOL_VARIABLE)
     {
@@ -304,11 +338,11 @@ void processAnd(TAC* tac, FILE* fout)
     fprintf(fout, "\t# TAC_AND\n");
 
     fprintf(fout, "\t# Coloca op1 em xmm0 e compara com 0\n");
-    testZeroAndOperator(tac->op1, fout);
+    testAndZeroOperator(tac->op1, fout);
     jumpZero(labelFalse, fout);
 
     fprintf(fout, "\t# Coloca op2 em xmm0 e compara com 0\n");
-    testZeroAndOperator(tac->op2, fout);
+    testAndZeroOperator(tac->op2, fout);
     jumpZero(labelFalse, fout);
 
     //Se chegou ate aqui ambos sao != 0, então o AND dá TRUE
@@ -331,11 +365,11 @@ void processOr(TAC* tac, FILE* fout)
     fprintf(fout, "\t# TAC_OR\n");
 
     fprintf(fout, "\t# Coloca op1 em xmm0 e compara com 0\n");
-    testZeroAndOperator(tac->op1, fout);
+    testAndZeroOperator(tac->op1, fout);
     jumpNotZero(labelTrue, fout);
 
     fprintf(fout, "\t# Coloca op2 em xmm0 e compara com 0\n");
-    testZeroAndOperator(tac->op2, fout);
+    testAndZeroOperator(tac->op2, fout);
     jumpNotZero(labelTrue, fout);
 
     //Se chegou ate aqui ambos sao == 0, então o OR dá FALSE
@@ -350,34 +384,39 @@ void processOr(TAC* tac, FILE* fout)
     label(labelEnd, fout);
 }
 
-void processArithmeticOperand(char* opText, int opType, int data_type, int registerNumber, FILE* fout)
+void compareOperators(HASH_NODE* op1, HASH_NODE* op2,FILE* fout)
 {
-    if (opType == SYMBOL_LIT_CHAR)
-    {
-        int op_value = opText[1];
-        intNumToFloatRegister(op_value, registerNumber, fout);
-    }
-    else if (opType == SYMBOL_LIT_INTEGER )
-    {
-        long int op_value = strtol(opText, NULL, 16);
-        intNumToFloatRegister(op_value, registerNumber, fout);
-    }
-    else if (opType == SYMBOL_LIT_FLOAT)
-    {
-        long int floatInInteger = castFloatHexStringToInt(opText);
-        floatNumToFloatRegister(floatInInteger, registerNumber, fout);
-    }
-    else if (opType == SYMBOL_VARIABLE)
-    {
-        if (isFloatVariable(data_type))
-        {
-            floatVarToFloatRegister(opText, registerNumber, fout);
-        }
-        else if (isIntVariable(data_type))
-        {
-            intVarToFloatRegister(opText, registerNumber, fout);
-        }
-    }
+    operandToFloatRegister(op1, 0, fout);
+    operandToFloatRegister(op2, 1, fout);
+    compareFloatRegister(fout);
+}
+
+void processEqDiff(TAC* tac, int zeroValue, int notZeroValue, FILE* fout)
+{
+    int labelZero = actualLabel++;
+    int labelEnd = actualLabel++;
+
+    compareOperators(tac->op1, tac->op2, fout);
+    jumpZero(labelZero, fout);
+
+    intNumToFloatVar(tac->res->text, notZeroValue, fout);
+	jump(labelEnd, fout);
+
+    label(labelZero, fout);
+
+    intNumToFloatVar(tac->res->text, zeroValue, fout);
+
+    label(labelEnd, fout);
+}
+
+void processEq(TAC* tac, FILE* fout)
+{
+    processEqDiff(tac, 1, 0, fout);
+}
+
+void processDiff(TAC* tac, FILE* fout)
+{
+    processEqDiff(tac, 0, 1, fout);
 }
 
 void processArithmeticResult(char* resultVar, char* opName, FILE* fout) 
@@ -388,8 +427,8 @@ void processArithmeticResult(char* resultVar, char* opName, FILE* fout)
 
 void processArithmeticOperation(TAC* tac, char* opName, FILE* fout) 
 {
-    processArithmeticOperand(tac->op1->text, tac->op1->type, tac->op1->data_type, 0, fout);  // 0 due to op1 -> register 0
-    processArithmeticOperand(tac->op2->text, tac->op2->type, tac->op2->data_type, 1, fout);  // 1 due to op2 -> register 1
+    operandToFloatRegister(tac->op1, 0, fout);  // 0 due to op1 -> register 0
+    operandToFloatRegister(tac->op2, 1, fout);  // 1 due to op2 -> register 1
     processArithmeticResult(tac->res->text, opName, fout);
 }
 
@@ -562,6 +601,14 @@ void generateASM(TAC* first)
     
     case TAC_OR:
         processOr(tac, fout);
+        break;
+    
+    case TAC_EQ:
+        processEq(tac, fout);
+        break;
+    
+    case TAC_DIF:
+        processDiff(tac, fout);
         break;
     
     default:
