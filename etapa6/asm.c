@@ -255,6 +255,7 @@ void printVariable(TAC* tac, FILE* fout)
         break;
         
         case DATATYPE_INT:
+        case DATATYPE_BOOL:
             fprintf(fout, "\tmovl	_%s(%%rip), %%esi\n", tac->res->text);
             callPrintFunction(".print_int_string", fout);
             
@@ -266,9 +267,10 @@ void printVariable(TAC* tac, FILE* fout)
             callPrintFunction(".print_float_string", fout);
         break;
 
-        case DATATYPE_BOOL:
-        printf("print bool %s\n", tac->res->text);
-        break;
+        // case DATATYPE_BOOL: ;    TODO se der tempo, printar em bool mesmo: TRUE ou FALSE
+        //     int boolValue = atoi(tac->res->text);
+        //     printf("print bool %s with value %d\n", tac->res->text, boolValue);
+        // break;
     }
 }
 
