@@ -325,6 +325,10 @@ void generateGlobalVariables(FILE* fout)
 
     // Print own variables for easier manipulation
     fprintf(fout, "floatTemp:\t.long\t0\n");
+    fprintf(fout, ".true_string:	.string	\"TRUE\"\n");
+    fprintf(fout, ".false_string:	.string	\"FALSE\"\n");
+    fprintf(fout, ".true:	.quad	.true_string\n");
+    fprintf(fout, ".false:	.quad	.false_string\n");
 
     fprintf(fout, "\n");
 }
