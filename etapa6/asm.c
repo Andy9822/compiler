@@ -108,6 +108,11 @@ void jumpZero(long int label, FILE* fout)
 	fprintf(fout, "\tjz	.L%li\n", label);
 }
 
+void jumpNotZero(long int label, FILE* fout)
+{
+	fprintf(fout, "\tjnz    .L%li\n", label);
+}
+
 void jump(long int label, FILE* fout)
 {
     fprintf(fout, "\tjmp  .L%li\n", label);
@@ -315,6 +320,33 @@ void processAnd(TAC* tac, FILE* fout)
     intNumToFloatVar(tac->res->text, 0, fout);
 
     fprintf(fout, "\t# END TAC_AND\n");
+    label(labelEnd, fout);
+}
+
+void processOr(TAC* tac, FILE* fout)
+{
+    int labelTrue = actualLabel++;
+    int labelEnd = actualLabel++;
+
+    fprintf(fout, "\t# TAC_OR\n");
+
+    fprintf(fout, "\t# Coloca op1 em xmm0 e compara com 0\n");
+    testZeroAndOperator(tac->op1, fout);
+    jumpNotZero(labelTrue, fout);
+
+    fprintf(fout, "\t# Coloca op2 em xmm0 e compara com 0\n");
+    testZeroAndOperator(tac->op2, fout);
+    jumpNotZero(labelTrue, fout);
+
+    //Se chegou ate aqui ambos sao == 0, então o OR dá FALSE
+    intNumToFloatVar(tac->res->text, 0, fout);
+	jump(labelEnd, fout);
+
+    //Se cai aqui é porque algum operando é 1, OR dá TRUE
+    label(labelTrue, fout);
+    intNumToFloatVar(tac->res->text, 1, fout);
+
+    fprintf(fout, "\t# END TAC_OR\n");
     label(labelEnd, fout);
 }
 
@@ -526,6 +558,10 @@ void generateASM(TAC* first)
     
     case TAC_AND:
         processAnd(tac, fout);
+        break;
+    
+    case TAC_OR:
+        processOr(tac, fout);
         break;
     
     default:
