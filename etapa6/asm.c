@@ -14,6 +14,44 @@ void callPrintFunction(char* printFuncName, FILE* fout)
     fprintf(fout, "\tleaq	%s(%%rip), %%rdi\n", printFuncName);
     fprintf(fout, "\tcall	printf@PLT\n\n");
 }
+
+void intRegisterToFloatRegister(int registerNumber, FILE* fout)
+{
+    fprintf(fout, "\tcvtsi2ssl	%%eax, %%xmm%d\n", registerNumber);
+}
+
+void intVarToFloatRegister(char* varName, int registerNumber, FILE* fout)
+{
+    fprintf(fout, "\tmovl	_%s(%%rip), %%eax\n", varName);
+    intRegisterToFloatRegister(registerNumber, fout);
+}
+
+void floatVarToFloatRegister(char* varName, int registerNumber, FILE* fout)
+{
+    fprintf(fout, "\tmovss	_%s(%%rip), %%xmm%d\n", varName, registerNumber);
+}
+
+void intNumToFloatRegister(long int value, int registerNumber, FILE* fout)
+{
+    fprintf(fout, "\tmovl	$%li, %%eax\n", value);
+    intRegisterToFloatRegister(registerNumber, fout);
+}
+
+void floatNumToFloatRegister(long int value, int registerNumber, FILE* fout)
+{
+    fprintf(fout, "\tmovl	$%li, %s(%%rip)\n", value, FLOAT_TEMP_VAR);
+    fprintf(fout, "\tmovss	 %s(%%rip), %%xmm%d\n", FLOAT_TEMP_VAR, registerNumber);
+}
+
+void saveFloatRegisterToFloatVar(char* resultVar, FILE* fout)
+{
+    fprintf(fout, "\tmovss	%%xmm0, _%s(%%rip)\n", resultVar);
+}
+
+void printWhiteLine(FILE* fout)
+{
+    fprintf(fout, "\n");
+}
 ////////////////////// END ASM EXPLICIT COMMANDS /////////////////////
 
 
@@ -77,54 +115,134 @@ void copyFloatLiteralToCharIntVariable(TAC* tac, FILE* fout)
     fprintf(fout, "\tmovl     %%eax, _%s(%%rip)\n", tac->res->text);
 }
 
+void copyToIntVar(TAC* tac, FILE* fout)
+{
+    if ( isIntLiteral(tac->op1->type) )
+    {
+        // Se valor for inteiro, faz strtol com base 16. Se for char, só pega o caractere mesmo
+        int value = tac->op1->type == SYMBOL_LIT_INTEGER ? strtol(tac->op1->text, NULL, 16) : tac->op1->text[1];
+        fprintf(fout, "\tmovl	$%d, _%s(%%rip) \n", value, tac->res->text);
+    }
+    else if (tac->op1->type == SYMBOL_LIT_FLOAT)
+    {
+        copyFloatLiteralToCharIntVariable(tac, fout);
+    }
+    else if(tac->op1->type == SYMBOL_VARIABLE)
+    {
+        //Se variável é int/char apenas move valores dela
+        if (tac->op1->data_type == DATATYPE_CHAR || tac->op1->data_type == DATATYPE_INT)
+        {
+            fprintf(fout, "\tmovl	_%s(%%rip), %%eax\n", tac->op1->text);
+            intRegisterToVariable(tac->op1->text, fout);
+        }
+        //Se variável é float casta pra int antes de mover
+        else if (isFloatVariable(tac->op1->data_type))
+        {
+            floatVarToFloatRegister(tac->op1->text, 0, fout);
+            fprintf(fout, "\tcvttss2sil	%%xmm0, %%eax\n");
+            intRegisterToVariable(tac->res->text, fout);
+        }
+    }
+}
+
+void copyToFloatVar(TAC* tac, FILE* fout)
+{
+    if ( isIntLiteral(tac->op1->type) )
+    {
+        // Se valor for inteiro, faz strtol com base 16. Se for char, só pega o caractere mesmo
+        long int value = tac->op1->type == SYMBOL_LIT_INTEGER ? strtol(tac->op1->text, NULL, 16) : tac->op1->text[1];
+        intNumToFloatRegister(value, 0, fout);
+        saveFloatRegisterToFloatVar(tac->res->text, fout);
+        
+    }
+    else if (tac->op1->type == SYMBOL_LIT_FLOAT)
+    {
+        long int op_value = castFloatHexStringToInt(tac->op1->text);
+        floatNumToFloatRegister(op_value, 0, fout);
+        saveFloatRegisterToFloatVar(tac->res->text, fout); // TODO passar pras switch essa porra de if
+    }
+    else if(tac->op1->type == SYMBOL_VARIABLE)
+    {
+        //Se variável é int/char apenas move valores dela
+        if (tac->op1->data_type == DATATYPE_CHAR || tac->op1->data_type == DATATYPE_INT)
+        {
+            intVarToFloatRegister(tac->op1->text, 0, fout);
+            saveFloatRegisterToFloatVar(tac->res->text, fout);
+        }
+        //Se variável é float casta pra int antes de mover
+        else if (isFloatVariable(tac->op1->data_type))
+        {
+            floatVarToFloatRegister(tac->op1->text, 0, fout);
+            saveFloatRegisterToFloatVar(tac->res->text, fout);
+        }
+    }
+}
+
 void processCopy(TAC* tac, FILE* fout) 
 {
     switch (tac->res->data_type)
     {
-    case DATATYPE_CHAR:
-    case DATATYPE_INT:
-        if (tac->op1->type == SYMBOL_LIT_INTEGER || tac->op1->type == SYMBOL_LIT_CHAR)
-        {
-            // Se valor for inteiro, faz strtol com base 16. Se for char, só pega o caractere mesmo
-            int value = tac->op1->type == SYMBOL_LIT_INTEGER ? strtol(tac->op1->text, NULL, 16) : tac->op1->text[1];
-            fprintf(fout, "\tmovl	$%d, _%s(%%rip) \n", value, tac->res->text);
-        }
-        else if (tac->op1->type == SYMBOL_LIT_FLOAT)
-        {
-            copyFloatLiteralToCharIntVariable(tac, fout);
-        }
-        else if(tac->op1->type == SYMBOL_VARIABLE)
-        {
-            //Se variável é int/char apenas move valores dela
-            if (tac->op1->data_type == DATATYPE_CHAR || tac->op1->data_type == DATATYPE_INT)
-            {
-                fprintf(fout, "\tmovl	_%s(%%rip), %%eax\n", tac->op1->text);
-                intRegisterToVariable(tac->op1->text, fout);
-            }
-            //Se variável é float casta pra int antes de mover
-            else if (tac->op1->data_type == DATATYPE_FLOAT)
-            {
-                fprintf(fout, "\tmovss	_%s(%%rip), %%xmm0\n", tac->op1->text);
-                fprintf(fout, "\tcvttss2sil	%%xmm0, %%eax\n");
-                intRegisterToVariable(tac->res->text, fout);
-            }
-        }
+        case DATATYPE_CHAR:
+        case DATATYPE_INT:
+            copyToIntVar(tac, fout);
+            // SYMBOL_VARIABLE
+            break;
         
+        case DATATYPE_FLOAT:
+        case DATATYPE_TEMP_FLOAT:
+            copyToFloatVar(tac, fout);
+            break;
         
-        // SYMBOL_VARIABLE
-        break;
-    
-    case DATATYPE_FLOAT:
-        /* code */
-        break;
-    
-    case DATATYPE_BOOL:
-        /* code */
-        break;
-    
-    default:
-        break;
+        case DATATYPE_BOOL:
+            /* code */
+            break;
+        
+        default:
+            break;
     }
+}
+
+void processAddOperand(char* opText, int opType, int data_type, int registerNumber, FILE* fout)
+{
+    if (opType == SYMBOL_LIT_CHAR)
+    {
+        int op_value = opText[1];
+        intNumToFloatRegister(op_value, registerNumber, fout);
+    }
+    else if (opType == SYMBOL_LIT_INTEGER )
+    {
+        long int op_value = strtol(opText, NULL, 16);
+        intNumToFloatRegister(op_value, registerNumber, fout);
+    }
+    else if (opType == SYMBOL_LIT_FLOAT)
+    {
+        long int floatInInteger = castFloatHexStringToInt(opText);
+        floatNumToFloatRegister(floatInInteger, registerNumber, fout);
+    }
+    else if (opType == SYMBOL_VARIABLE)
+    {
+        if (isFloatVariable(data_type))
+        {
+            floatVarToFloatRegister(opText, registerNumber, fout);
+        }
+        else if (isIntVariable(data_type))
+        {
+            intVarToFloatRegister(opText, registerNumber, fout);
+        }
+    }
+}
+
+void processAddResult(char* resultVar, FILE* fout) 
+{
+    fprintf(fout, "\taddss	%%xmm1, %%xmm0\n");
+    saveFloatRegisterToFloatVar(resultVar, fout);
+}
+
+void processAdd(TAC* tac, FILE* fout) 
+{
+    processAddOperand(tac->op1->text, tac->op1->type, tac->op1->data_type, 0, fout);  // 0 due to op1 -> register 0
+    processAddOperand(tac->op2->text, tac->op2->type, tac->op2->data_type, 1, fout);  // 1 due to op2 -> register 1
+    processAddResult(tac->res->text, fout);
 }
 
 void printVariable(TAC* tac, FILE* fout)
@@ -132,19 +250,19 @@ void printVariable(TAC* tac, FILE* fout)
     switch (tac->res->data_type)
     {
         case DATATYPE_CHAR:
-        printf("print char %s\n", tac->res->text);
+            fprintf(fout, "\tmovl	_%s(%%rip), %%esi\n", tac->res->text);
+            callPrintFunction(".print_char_string", fout);
         break;
         
         case DATATYPE_INT:
-        fprintf(fout, "\tmovl	_%s(%%rip), %%esi\n", tac->res->text);
-        fprintf(fout, "\tleaq	.print_int_string(%%rip), %%rdi\n");
-        callPrintFunction(".print_int_string", fout);
+            fprintf(fout, "\tmovl	_%s(%%rip), %%esi\n", tac->res->text);
+            callPrintFunction(".print_int_string", fout);
+            
         break;
         
         case DATATYPE_FLOAT:
-            fprintf(fout, "\tmovss	_%s(%%rip), %%xmm0\n", tac->res->text);
+            floatVarToFloatRegister(tac->res->text, 0, fout);
             fprintf(fout, "\tcvtss2sd	%%xmm0, %%xmm0\n");
-            fprintf(fout, "\tleaq	.print_float_string(%%rip), %%rdi\n");
             callPrintFunction(".print_float_string", fout);
         break;
 
@@ -191,21 +309,24 @@ void generateNormalVariable(HASH_NODE* node,FILE* fout)
 
 void generateGlobalVariables(FILE* fout)
 {
-  int i;
-  HASH_NODE* node;
-
-  for (i = 0; i < HASH_SIZE; i++)
-  {
-    for (node=HASH_TABLE[i]; node; node = node->next)
+    // Print Hash Table Variables
+    int i;
+    HASH_NODE* node;
+    for (i = 0; i < HASH_SIZE; i++)
     {
-      if (node->type == SYMBOL_VARIABLE)
-      {
-          generateNormalVariable(node, fout);
-      }
+        for (node=HASH_TABLE[i]; node; node = node->next)
+        {
+            if (node->type == SYMBOL_VARIABLE)
+            {
+                generateNormalVariable(node, fout);
+            }
+        }
     }
-  }
-  
-  fprintf(fout, "\n");
+
+    // Print own floatTemp variable for easier use of float literals
+    fprintf(fout, "floatTemp:\t.long\t0\n");
+
+    fprintf(fout, "\n");
 }
 
 void generateASM(TAC* first)
@@ -221,6 +342,8 @@ void generateASM(TAC* first)
   fprintf(fout, ".data\n\n");
   fprintf(fout, ".print_int_string:\n");
   fprintf(fout, "\t.string	\"%%d\\n\"\n\n");
+  fprintf(fout, ".print_char_string:\n");
+  fprintf(fout, "\t.string	\"%%c\\n\"\n\n");
   fprintf(fout, ".print_float_string:\n");
   fprintf(fout, "\t.string	\"%%f\\n\"\n\n");
   fprintf(fout, ".print_string:\n");
@@ -257,6 +380,12 @@ void generateASM(TAC* first)
     
     case TAC_COPY:
         processCopy(tac, fout);
+        printWhiteLine(fout);
+        break;
+    
+    case TAC_ADD:
+        processAdd(tac, fout);
+        printWhiteLine(fout);
         break;
     
     default:
