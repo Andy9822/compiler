@@ -100,6 +100,17 @@ void compareFloatRegister(FILE* fout)
 {
     fprintf(fout, "\tucomiss	%%xmm0, %%xmm1\n");
 }
+
+void compareFloatRegisterOrdered(FILE* fout)
+{
+    fprintf(fout, "\tcomiss	%%xmm0, %%xmm1\n");
+}
+
+void zeroRegister(char* registerName, FILE* fout)
+{
+    fprintf(fout, "\tpxor	%%%s, %%%s\n", registerName, registerName);
+}
+
 void testZeroFloatRegister(FILE* fout)
 {
     fprintf(fout, "\tpxor	%%xmm1, %%xmm1\n");
@@ -131,6 +142,11 @@ void jumpNotZero(long int label, FILE* fout)
 void jump(long int label, FILE* fout)
 {
     fprintf(fout, "\tjmp  .L%li\n", label);
+}
+
+void jumpB(long int label, FILE* fout)
+{
+    fprintf(fout, "\tjb  .L%li\n", label);
 }
 
 void label(long int label, FILE* fout)
@@ -350,6 +366,37 @@ void processDiff(TAC* tac, FILE* fout)
     processEqDiff(tac, 0, 1, fout);
 }
 
+void processGELE(TAC* tac, int op1Register, int op2Register, FILE* fout)
+{
+    int labelBranching = actualLabel++;
+    int labelEnd = actualLabel++;
+
+    processOperandToFloatRegister(tac->op1, op1Register, fout);
+    processOperandToFloatRegister(tac->op2, op2Register, fout);
+
+    compareFloatRegisterOrdered(fout);
+    jumpB(labelBranching, fout);
+
+    intNumToFloatRegister(1, DEFAULT_REGISTER, fout);
+    jump(labelEnd, fout);
+
+    label(labelBranching, fout);
+    intNumToFloatRegister(0, DEFAULT_REGISTER, fout);
+
+    label(labelEnd, fout);
+    saveFloatRegisterToFloatVar(tac->res->text, fout);
+}
+
+void processGE(TAC* tac, FILE* fout)
+{
+    processGELE(tac, 1, 0, fout);
+}
+
+void processLE(TAC* tac, FILE* fout)
+{
+    processGELE(tac, 0, 1, fout);
+}
+
 void processArithmeticResult(char* resultVar, char* opName, FILE* fout) 
 {
     fprintf(fout, "\t%sss	%%xmm1, %%xmm0\n", opName);
@@ -540,6 +587,14 @@ void generateASM(TAC* first)
     
     case TAC_DIF:
         processDiff(tac, fout);
+        break;
+    
+    case TAC_GE:
+        processGE(tac, fout);
+        break;
+    
+    case TAC_LE:
+        processLE(tac, fout);
         break;
     
     default:
