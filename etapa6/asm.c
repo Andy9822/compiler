@@ -202,7 +202,7 @@ void processCopy(TAC* tac, FILE* fout)
     }
 }
 
-void processAddOperand(char* opText, int opType, int data_type, int registerNumber, FILE* fout)
+void processArithmeticOperand(char* opText, int opType, int data_type, int registerNumber, FILE* fout)
 {
     if (opType == SYMBOL_LIT_CHAR)
     {
@@ -232,17 +232,17 @@ void processAddOperand(char* opText, int opType, int data_type, int registerNumb
     }
 }
 
-void processAddResult(char* resultVar, FILE* fout) 
+void processArithmeticResult(char* resultVar, char* opName, FILE* fout) 
 {
-    fprintf(fout, "\taddss	%%xmm1, %%xmm0\n");
+    fprintf(fout, "\t%sss	%%xmm1, %%xmm0\n", opName);
     saveFloatRegisterToFloatVar(resultVar, fout);
 }
 
-void processAdd(TAC* tac, FILE* fout) 
+void processArithmeticOperation(TAC* tac, char* opName, FILE* fout) 
 {
-    processAddOperand(tac->op1->text, tac->op1->type, tac->op1->data_type, 0, fout);  // 0 due to op1 -> register 0
-    processAddOperand(tac->op2->text, tac->op2->type, tac->op2->data_type, 1, fout);  // 1 due to op2 -> register 1
-    processAddResult(tac->res->text, fout);
+    processArithmeticOperand(tac->op1->text, tac->op1->type, tac->op1->data_type, 0, fout);  // 0 due to op1 -> register 0
+    processArithmeticOperand(tac->op2->text, tac->op2->type, tac->op2->data_type, 1, fout);  // 1 due to op2 -> register 1
+    processArithmeticResult(tac->res->text, opName, fout);
 }
 
 void printVariable(TAC* tac, FILE* fout)
@@ -323,7 +323,7 @@ void generateGlobalVariables(FILE* fout)
         }
     }
 
-    // Print own floatTemp variable for easier use of float literals
+    // Print own variables for easier manipulation
     fprintf(fout, "floatTemp:\t.long\t0\n");
 
     fprintf(fout, "\n");
@@ -384,7 +384,21 @@ void generateASM(TAC* first)
         break;
     
     case TAC_ADD:
-        processAdd(tac, fout);
+        processArithmeticOperation(tac, "add", fout);
+        printWhiteLine(fout);
+        break;
+    case TAC_SUB:
+        processArithmeticOperation(tac, "sub", fout);
+        printWhiteLine(fout);
+        break;
+    
+    case TAC_MULT:
+        processArithmeticOperation(tac, "mul", fout);
+        printWhiteLine(fout);
+        break;
+    
+    case TAC_DIV:
+        processArithmeticOperation(tac, "div", fout);
         printWhiteLine(fout);
         break;
     
