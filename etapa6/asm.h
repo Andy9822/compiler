@@ -10,6 +10,7 @@
 #define isBoolLiteral(x) (x == SYMBOL_LIT_TRUE || x == SYMBOL_LIT_FALSE)
 #define DATATYPE_TEMP_FLOAT DATATYPE_UNDEFINED
 #define FLOAT_TEMP_VAR "floatTemp"
+#define DEFAULT_REGISTER 0
 
 void generateASM(TAC* first);
 

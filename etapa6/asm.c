@@ -3,6 +3,9 @@
 #include "tacs.h"
 #include "type_inference.h"
 
+long int labelCount = 0;
+long int actualLabel = 0;
+
 ////////////////////// ASM EXPLICIT COMMANDS /////////////////////
 void intRegisterToVariable(char* varName, FILE* fout)
 {
@@ -47,6 +50,13 @@ void floatVarToFloatRegister(char* varName, int registerNumber, FILE* fout)
     fprintf(fout, "\tmovss	_%s(%%rip), %%xmm%d\n", varName, registerNumber);
 }
 
+
+void floatVarToIntVar(char* src, char* dst, int registerNumber, FILE* fout)
+{
+    floatVarToFloatRegister(src, registerNumber, fout);
+    fprintf(fout, "\tcvttss2sil	%%xmm0, %%eax\n");
+    intRegisterToVariable(dst, fout);
+}
 void intNumToFloatRegister(long int value, int registerNumber, FILE* fout)
 {
     intNumToRegister(value, fout);
@@ -64,9 +74,48 @@ void saveFloatRegisterToFloatVar(char* resultVar, FILE* fout)
     fprintf(fout, "\tmovss	%%xmm0, _%s(%%rip)\n", resultVar);
 }
 
+void intNumToFloatVar(char* varName, long int value, FILE* fout) 
+{
+    intNumToFloatRegister(value, DEFAULT_REGISTER, fout);
+    saveFloatRegisterToFloatVar(varName, fout);
+}
+
 void printWhiteLine(FILE* fout)
 {
     fprintf(fout, "\n");
+}
+
+void testZeroFloatRegister( FILE* fout)
+{
+    fprintf(fout, "\tpxor	%%xmm1, %%xmm1\n");
+    fprintf(fout, "\tucomiss	%%xmm0, %%xmm1\n");
+}
+
+void testZeroFloatVar(char* varName, FILE* fout)
+{
+    floatVarToFloatRegister(varName, DEFAULT_REGISTER, fout);
+    testZeroFloatRegister(fout);
+}
+
+void testZeroIntNum(long int value, FILE* fout)
+{
+    intNumToFloatRegister(value, DEFAULT_REGISTER, fout);
+    testZeroFloatRegister(fout);
+}
+
+void jumpZero(long int label, FILE* fout)
+{
+	fprintf(fout, "\tjz	.L%li\n", label);
+}
+
+void jump(long int label, FILE* fout)
+{
+    fprintf(fout, "\tjmp  .L%li\n", label);
+}
+
+void label(long int label, FILE* fout)
+{
+    fprintf(fout, ".L%li:\n", label);
 }
 ////////////////////// END ASM EXPLICIT COMMANDS /////////////////////
 
@@ -154,9 +203,7 @@ void copyToIntVar(TAC* tac, FILE* fout)
         //Se variável é float casta pra int antes de mover
         else if (isFloatVariable(tac->op1->data_type))
         {
-            floatVarToFloatRegister(tac->op1->text, 0, fout);
-            fprintf(fout, "\tcvttss2sil	%%xmm0, %%eax\n");
-            intRegisterToVariable(tac->res->text, fout);
+            floatVarToIntVar(tac->op1->text, tac->res->text, DEFAULT_REGISTER, fout);
         }
     }
 }
@@ -203,8 +250,7 @@ void copyToBoolVar(TAC* tac, FILE* fout)
     }
     else if (tac->op1->type == SYMBOL_VARIABLE)
     {
-        intVarToRegister(tac->op1->text, fout);
-        intRegisterToVariable(tac->res->text, fout);
+        floatVarToIntVar(tac->op1->text, tac->res->text, DEFAULT_REGISTER, fout);
     }
 }
 
@@ -230,6 +276,46 @@ void processCopy(TAC* tac, FILE* fout)
         default:
             break;
     }
+}
+
+void testZeroAndOperator(HASH_NODE* op, FILE* fout)
+{
+    if (op->type == SYMBOL_VARIABLE)
+    {
+        testZeroFloatVar(op->text, fout);
+    }
+    else if (isBoolLiteral(op->type))
+    {
+        int bool_value = (strcmp(op->text, "TRUE") == 0) ? 1 : 0;
+        testZeroIntNum(bool_value, fout);
+    }
+}
+
+void processAnd(TAC* tac, FILE* fout)
+{
+    int labelFalse = actualLabel++;
+    int labelEnd = actualLabel++;
+
+    fprintf(fout, "\t# TAC_AND\n");
+
+    fprintf(fout, "\t# Coloca op1 em xmm0 e compara com 0\n");
+    testZeroAndOperator(tac->op1, fout);
+    jumpZero(labelFalse, fout);
+
+    fprintf(fout, "\t# Coloca op2 em xmm0 e compara com 0\n");
+    testZeroAndOperator(tac->op2, fout);
+    jumpZero(labelFalse, fout);
+
+    //Se chegou ate aqui ambos sao != 0, então o AND dá TRUE
+    intNumToFloatVar(tac->res->text, 1, fout);
+	jump(labelEnd, fout);
+
+    //Se cai aqui é porque algum operando é 0, AND dá FALSE
+    label(labelFalse, fout);
+    intNumToFloatVar(tac->res->text, 0, fout);
+
+    fprintf(fout, "\t# END TAC_AND\n");
+    label(labelEnd, fout);
 }
 
 void processArithmeticOperand(char* opText, int opType, int data_type, int registerNumber, FILE* fout)
@@ -436,6 +522,10 @@ void generateASM(TAC* first)
     case TAC_DIV:
         processArithmeticOperation(tac, "div", fout);
         printWhiteLine(fout);
+        break;
+    
+    case TAC_AND:
+        processAnd(tac, fout);
         break;
     
     default:
