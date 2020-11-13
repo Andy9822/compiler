@@ -7,7 +7,7 @@ long int labelCount = 0;
 long int actualLabel = 0;
 
 ////////////////////// ASM EXPLICIT COMMANDS /////////////////////
-void intRegisterToVariable(char* varName, FILE* fout)
+void saveIntRegisterToVariable(char* varName, FILE* fout)
 {
     fprintf(fout, "\tmovl	%%eax, _%s(%%rip)\n", varName);
 }
@@ -20,7 +20,7 @@ void intNumToRegister(long int value, FILE* fout)
 void intNumToVar(char* varName, long int value, FILE* fout)
 {
     intNumToRegister(value, fout);
-    intRegisterToVariable(varName, fout);
+    saveIntRegisterToVariable(varName, fout);
 }
 
 void intVarToRegister(char* varName, FILE* fout)
@@ -50,13 +50,18 @@ void floatVarToFloatRegister(char* varName, int registerNumber, FILE* fout)
     fprintf(fout, "\tmovss	_%s(%%rip), %%xmm%d\n", varName, registerNumber);
 }
 
+void floatRegisterToIntRegister(FILE* fout)
+{
+    fprintf(fout, "\tcvttss2sil	%%xmm0, %%eax\n");
+}
 
 void floatVarToIntVar(char* src, char* dst, int registerNumber, FILE* fout)
 {
     floatVarToFloatRegister(src, registerNumber, fout);
-    fprintf(fout, "\tcvttss2sil	%%xmm0, %%eax\n");
-    intRegisterToVariable(dst, fout);
+    floatRegisterToIntRegister(fout);
+    saveIntRegisterToVariable(dst, fout);
 }
+
 void intNumToFloatRegister(long int value, int registerNumber, FILE* fout)
 {
     intNumToRegister(value, fout);
@@ -72,6 +77,12 @@ void floatNumToFloatRegister(long int value, int registerNumber, FILE* fout)
 void saveFloatRegisterToFloatVar(char* resultVar, FILE* fout)
 {
     fprintf(fout, "\tmovss	%%xmm0, _%s(%%rip)\n", resultVar);
+}
+
+void saveFloatRegisterToIntVar(char* varName, FILE* fout)
+{
+    floatRegisterToIntRegister(fout);
+    saveIntRegisterToVariable(varName, fout);
 }
 
 void intNumToFloatVar(char* varName, long int value, FILE* fout) 
@@ -179,17 +190,7 @@ int castFloatHexStringToInt(char* string)
     return floatInInteger;
 }
 
-void copyFloatLiteralToCharIntVariable(TAC* tac, FILE* fout)
-{
-    int floatInInteger = castFloatHexStringToInt(tac->op1->text);
-
-    fprintf(fout, "\tmovl	$%d, %%eax\n", floatInInteger);
-    fprintf(fout, "\tmovd	%%eax, %%xmm0\n");
-    fprintf(fout, "\tcvttss2sil	%%xmm0, %%eax\n");
-    fprintf(fout, "\tmovl     %%eax, _%s(%%rip)\n", tac->res->text);
-}
-
-void operandToFloatRegister(HASH_NODE* op, int registerNumber, FILE* fout)
+void processOperandToFloatRegister(HASH_NODE* op, int registerNumber, FILE* fout)
 {
     if (op->type == SYMBOL_LIT_CHAR)
     {
@@ -221,64 +222,16 @@ void operandToFloatRegister(HASH_NODE* op, int registerNumber, FILE* fout)
 
 void copyToIntVar(TAC* tac, FILE* fout)
 {
-    if ( isIntLiteral(tac->op1->type) )
-    {
-        // Se valor for inteiro, faz strtol com base 16. Se for char, só pega o caractere mesmo
-        int value = tac->op1->type == SYMBOL_LIT_INTEGER ? strtol(tac->op1->text, NULL, 16) : tac->op1->text[1];
-        fprintf(fout, "\tmovl	$%d, _%s(%%rip) \n", value, tac->res->text);
-    }
-    else if (tac->op1->type == SYMBOL_LIT_FLOAT)
-    {
-        copyFloatLiteralToCharIntVariable(tac, fout);
-    }
-    else if(tac->op1->type == SYMBOL_VARIABLE)
-    {
-        //Se variável é int/char apenas move valores dela
-        if (tac->op1->data_type == DATATYPE_CHAR || tac->op1->data_type == DATATYPE_INT)
-        {
-            fprintf(fout, "\tmovl	_%s(%%rip), %%eax\n", tac->op1->text);
-            intRegisterToVariable(tac->op1->text, fout);
-        }
-        //Se variável é float casta pra int antes de mover
-        else if (isFloatVariable(tac->op1->data_type))
-        {
-            floatVarToIntVar(tac->op1->text, tac->res->text, DEFAULT_REGISTER, fout);
-        }
-    }
+    processOperandToFloatRegister(tac->op1, DEFAULT_REGISTER, fout);
+    saveFloatRegisterToIntVar(tac->res->text, fout);
 }
 
 void copyToFloatVar(TAC* tac, FILE* fout)
 {
-    if ( isIntLiteral(tac->op1->type) )
-    {
-        // Se valor for inteiro, faz strtol com base 16. Se for char, só pega o caractere mesmo
-        long int value = tac->op1->type == SYMBOL_LIT_INTEGER ? strtol(tac->op1->text, NULL, 16) : tac->op1->text[1];
-        intNumToFloatRegister(value, 0, fout);
-        saveFloatRegisterToFloatVar(tac->res->text, fout);
-        
-    }
-    else if (tac->op1->type == SYMBOL_LIT_FLOAT)
-    {
-        long int op_value = castFloatHexStringToInt(tac->op1->text);
-        floatNumToFloatRegister(op_value, 0, fout);
-        saveFloatRegisterToFloatVar(tac->res->text, fout); // TODO passar pras switch essa porra de if
-    }
-    else if(tac->op1->type == SYMBOL_VARIABLE)
-    {
-        //Se variável é int/char apenas move valores dela
-        if (tac->op1->data_type == DATATYPE_CHAR || tac->op1->data_type == DATATYPE_INT)
-        {
-            intVarToFloatRegister(tac->op1->text, 0, fout);
-            saveFloatRegisterToFloatVar(tac->res->text, fout);
-        }
-        //Se variável é float casta pra int antes de mover
-        else if (isFloatVariable(tac->op1->data_type))
-        {
-            floatVarToFloatRegister(tac->op1->text, 0, fout);
-            saveFloatRegisterToFloatVar(tac->res->text, fout);
-        }
-    }
+    processOperandToFloatRegister(tac->op1, DEFAULT_REGISTER, fout);
+    saveFloatRegisterToFloatVar(tac->res->text, fout);
 }
+
 void copyToBoolVar(TAC* tac, FILE* fout)
 {
     if (isBoolLiteral(tac->op1->type))
@@ -330,64 +283,42 @@ void testAndZeroOperator(HASH_NODE* op, FILE* fout)
     }
 }
 
-void processAnd(TAC* tac, FILE* fout)
+void processAndOr(TAC* tac, int zeroValue, int notZeroValue, FILE* fout)
 {
-    int labelFalse = actualLabel++;
+    int labelNotZero = actualLabel++;
     int labelEnd = actualLabel++;
 
-    fprintf(fout, "\t# TAC_AND\n");
-
-    fprintf(fout, "\t# Coloca op1 em xmm0 e compara com 0\n");
+    //Coloca op1 em xmm0 e compara com 0
     testAndZeroOperator(tac->op1, fout);
-    jumpZero(labelFalse, fout);
+    jumpNotZero(labelNotZero, fout);
 
-    fprintf(fout, "\t# Coloca op2 em xmm0 e compara com 0\n");
+    // # Coloca op2 em xmm0 e compara com 0;
     testAndZeroOperator(tac->op2, fout);
-    jumpZero(labelFalse, fout);
+    jumpNotZero(labelNotZero, fout);
 
-    //Se chegou ate aqui ambos sao != 0, então o AND dá TRUE
-    intNumToFloatVar(tac->res->text, 1, fout);
+    intNumToFloatVar(tac->res->text, zeroValue, fout);
 	jump(labelEnd, fout);
 
-    //Se cai aqui é porque algum operando é 0, AND dá FALSE
-    label(labelFalse, fout);
-    intNumToFloatVar(tac->res->text, 0, fout);
+    label(labelNotZero, fout);
+    intNumToFloatVar(tac->res->text, notZeroValue, fout);
 
-    fprintf(fout, "\t# END TAC_AND\n");
     label(labelEnd, fout);
 }
 
 void processOr(TAC* tac, FILE* fout)
 {
-    int labelTrue = actualLabel++;
-    int labelEnd = actualLabel++;
+    processAndOr(tac, 0, 1, fout);
+}
 
-    fprintf(fout, "\t# TAC_OR\n");
-
-    fprintf(fout, "\t# Coloca op1 em xmm0 e compara com 0\n");
-    testAndZeroOperator(tac->op1, fout);
-    jumpNotZero(labelTrue, fout);
-
-    fprintf(fout, "\t# Coloca op2 em xmm0 e compara com 0\n");
-    testAndZeroOperator(tac->op2, fout);
-    jumpNotZero(labelTrue, fout);
-
-    //Se chegou ate aqui ambos sao == 0, então o OR dá FALSE
-    intNumToFloatVar(tac->res->text, 0, fout);
-	jump(labelEnd, fout);
-
-    //Se cai aqui é porque algum operando é 1, OR dá TRUE
-    label(labelTrue, fout);
-    intNumToFloatVar(tac->res->text, 1, fout);
-
-    fprintf(fout, "\t# END TAC_OR\n");
-    label(labelEnd, fout);
+void processAnd(TAC* tac, FILE* fout)
+{
+    processAndOr(tac, 1, 0, fout);
 }
 
 void compareOperators(HASH_NODE* op1, HASH_NODE* op2,FILE* fout)
 {
-    operandToFloatRegister(op1, 0, fout);
-    operandToFloatRegister(op2, 1, fout);
+    processOperandToFloatRegister(op1, 0, fout);
+    processOperandToFloatRegister(op2, 1, fout);
     compareFloatRegister(fout);
 }
 
@@ -427,8 +358,8 @@ void processArithmeticResult(char* resultVar, char* opName, FILE* fout)
 
 void processArithmeticOperation(TAC* tac, char* opName, FILE* fout) 
 {
-    operandToFloatRegister(tac->op1, 0, fout);  // 0 due to op1 -> register 0
-    operandToFloatRegister(tac->op2, 1, fout);  // 1 due to op2 -> register 1
+    processOperandToFloatRegister(tac->op1, 0, fout);  // 0 due to op1 -> register 0
+    processOperandToFloatRegister(tac->op2, 1, fout);  // 1 due to op2 -> register 1
     processArithmeticResult(tac->res->text, opName, fout);
 }
 
