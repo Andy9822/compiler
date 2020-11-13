@@ -365,7 +365,7 @@ void processDiff(TAC* tac, FILE* fout)
     processEqDiff(tac, 0, 1, fout);
 }
 
-void processGELE(TAC* tac, int op1Register, int op2Register, FILE* fout)
+void processGELE(TAC* tac, int op1Register, int op2Register, int isGEorLE,FILE* fout)
 {
     int labelBranching = actualLabel++;
     int labelEnd = actualLabel++;
@@ -376,11 +376,11 @@ void processGELE(TAC* tac, int op1Register, int op2Register, FILE* fout)
     compareFloatRegisterOrdered(fout);
     jumpB(labelBranching, fout);
 
-    intNumToFloatRegister(1, DEFAULT_REGISTER, fout);
+    intNumToFloatRegister(isGEorLE, DEFAULT_REGISTER, fout);
     jump(labelEnd, fout);
 
     label(labelBranching, fout);
-    intNumToFloatRegister(0, DEFAULT_REGISTER, fout);
+    intNumToFloatRegister(!isGEorLE, DEFAULT_REGISTER, fout);
 
     label(labelEnd, fout);
     saveFloatRegisterToFloatVar(tac->res->text, fout);
@@ -388,12 +388,32 @@ void processGELE(TAC* tac, int op1Register, int op2Register, FILE* fout)
 
 void processGE(TAC* tac, FILE* fout)
 {
-    processGELE(tac, 1, 0, fout);
+    processGELE(tac, 1, 0, 1, fout);
 }
 
 void processLE(TAC* tac, FILE* fout)
 {
-    processGELE(tac, 0, 1, fout);
+    processGELE(tac, 0, 1, 1, fout);
+}
+
+void calculateGreatThan(TAC* tac, FILE* fout)
+{
+     processGELE(tac, 0, 1, 0, fout);
+}
+
+void calculateLessThan(TAC* tac, FILE* fout)
+{
+    processGELE(tac, 1, 0, 0, fout);
+}
+
+void processGT(TAC* tac, FILE* fout)
+{
+    calculateGreatThan(tac, fout);
+}
+
+void processLT(TAC* tac, FILE* fout)
+{
+    calculateLessThan(tac, fout);
 }
 
 void processNot(TAC* tac, FILE* fout)
@@ -620,6 +640,14 @@ void generateASM(TAC* first)
     
     case TAC_NOT:
         processNot(tac, fout);
+        break;
+    
+    case TAC_GREATER:
+        processGT(tac, fout);
+        break;
+    
+    case TAC_LESSER:
+        processLT(tac, fout);
         break;
     
     default:
