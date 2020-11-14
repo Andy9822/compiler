@@ -178,13 +178,17 @@ TAC* createLoop(HASH_NODE* symbol, TAC* code_expr_start, TAC* code_expr_end, TAC
   TAC* label_begin_tac = 0;
   HASH_NODE* beggining_label = 0;
   beggining_label = makeLabel();
+  TAC* idx_check_range_tac = 0;
+  HASH_NODE* temp_idx_lt = makeTemp();
 
-  // We create the beggining label right after the starting attribution 
+  // We create the beggining label right after the starting attribution and check if idx still in range 
   label_begin_tac = tacCreate(TAC_LABEL, beggining_label, 0, 0);
   label_begin_tac->prev = tac_expr_start;
+  idx_check_range_tac = tacCreate(TAC_LESSER, temp_idx_lt, symbol, code_expr_end->res);
+  idx_check_range_tac->prev = label_begin_tac;
 
   // We create a jump to the end in case clausule is false
-  jmp_false_tac = tacCreate(TAC_JMP_FALSE, end_label, code_expr_end->res, 0);
+  jmp_false_tac = tacCreate(TAC_JMP_FALSE, end_label, temp_idx_lt, 0);
   jmp_false_tac->prev = code_expr_end;
 
   // Right after the command block we manually update our identifier with our "step expression"
@@ -202,9 +206,7 @@ TAC* createLoop(HASH_NODE* symbol, TAC* code_expr_start, TAC* code_expr_end, TAC
   label_end_tac = tacCreate(TAC_LABEL, end_label, 0, 0);
   label_end_tac->prev = jmp_begin_tac;
 
-
-
-  return tacJoin(label_begin_tac, tacJoin(jmp_false_tac, tacJoin(code_cmd, label_end_tac)));
+  return tacJoin(idx_check_range_tac, tacJoin(jmp_false_tac, tacJoin(code_cmd, label_end_tac)));
 }
 
 TAC* createIfElse(TAC* code0, TAC* code1, TAC* code2)
