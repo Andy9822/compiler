@@ -30,8 +30,10 @@ void intVarToRegister(char* varName, FILE* fout)
 
 void callPrintFunction(char* printFuncName, FILE* fout)
 {
+    fprintf(fout, "\tmovl	$1, %%eax\n");
     fprintf(fout, "\tleaq	%s(%%rip), %%rdi\n", printFuncName);
-    fprintf(fout, "\tcall	printf@PLT\n\n");
+    fprintf(fout, "\tcall	printf@PLT\n");
+    fprintf(fout, "\tmovl	$0, %%eax\n\n");
 }
 
 void intRegisterToFloatRegister(int registerNumber, FILE* fout)
@@ -134,6 +136,11 @@ void jumpZero(long int label, FILE* fout)
 	fprintf(fout, "\tjz	.L%li\n", label);
 }
 
+void jumpZeroStr(char* labelName, FILE* fout)
+{
+	fprintf(fout, "\tjz	%s\n", labelName);
+}
+
 void jumpNotZero(long int label, FILE* fout)
 {
 	fprintf(fout, "\tjnz    .L%li\n", label);
@@ -152,6 +159,11 @@ void jumpB(long int label, FILE* fout)
 void label(long int label, FILE* fout)
 {
     fprintf(fout, ".L%li:\n", label);
+}
+
+void generateLabel(char* labelName, FILE* fout)
+{
+    fprintf(fout, "%s:\n", labelName);
 }
 ////////////////////// END ASM EXPLICIT COMMANDS /////////////////////
 
@@ -416,6 +428,13 @@ void processLT(TAC* tac, FILE* fout)
     calculateLessThan(tac, fout);
 }
 
+void processJMPF(TAC* tac, FILE* fout)
+{
+    processOperandToFloatRegister(tac->op1, 0, fout);
+    testZeroFloatRegister(fout);
+    jumpZeroStr(tac->res->text, fout);
+}
+
 void processNot(TAC* tac, FILE* fout)
 {
     int labelNotZero = actualLabel++;
@@ -648,6 +667,14 @@ void generateASM(TAC* first)
     
     case TAC_LESSER:
         processLT(tac, fout);
+        break;
+    
+    case TAC_JMP_FALSE:
+        processJMPF(tac, fout);
+        break;
+    
+    case TAC_LABEL:
+        generateLabel(tac->res->text, fout);
         break;
     
     default:
