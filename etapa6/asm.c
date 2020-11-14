@@ -136,6 +136,14 @@ void jumpZero(long int label, FILE* fout)
 	fprintf(fout, "\tjz	.L%li\n", label);
 }
 
+void readToVariable(char* varName, FILE* fout)
+{
+    fprintf(fout, "\tleaq   _%s(%%rip), %%rsi\n", varName);
+    fprintf(fout, "\tleaq	.scanf_string(%%rip), %%rdi\n");
+    fprintf(fout, "\tmovl	$0, %%eax\n");
+    fprintf(fout, "\tcall	__isoc99_scanf@PLT\n");
+}
+
 void jumpZeroStr(char* labelName, FILE* fout)
 {
 	fprintf(fout, "\tjz	%s\n", labelName);
@@ -445,6 +453,15 @@ void processJMP(TAC* tac, FILE* fout)
     jumpStr(tac->res->text, fout);
 }
 
+void processRead(TAC* tac, FILE* fout)
+{
+    readToVariable(tac->res->text, fout);
+    if (isIntVariable(tac->res->data_type) || tac->res->data_type == DATATYPE_BOOL)
+    {
+        floatVarToIntVar(tac->res->text, tac->res->text, DEFAULT_REGISTER, fout);
+    }
+}
+
 void processNot(TAC* tac, FILE* fout)
 {
     int labelNotZero = actualLabel++;
@@ -566,6 +583,7 @@ void generateGlobalVariables(FILE* fout)
     fprintf(fout, ".false_string:	.string	\"FALSE\"\n");
     fprintf(fout, ".true:	.quad	.true_string\n");
     fprintf(fout, ".false:	.quad	.false_string\n");
+    fprintf(fout, ".scanf_string:   .string	\"%%f\"\n");
 
     fprintf(fout, "\n");
 }
@@ -689,6 +707,10 @@ void generateASM(TAC* first)
     
     case TAC_JMP:
         processJMP(tac, fout);
+        break;
+    
+    case TAC_READ:
+        processRead(tac, fout);
         break;
     
     default:
