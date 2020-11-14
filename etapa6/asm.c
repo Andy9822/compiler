@@ -3,8 +3,9 @@
 #include "tacs.h"
 #include "type_inference.h"
 
-long int labelCount = 0;
+long int actualFunctionLabel = 0;
 long int actualLabel = 0;
+int isMainFunction = 0;
 
 ////////////////////// ASM EXPLICIT COMMANDS /////////////////////
 void saveIntRegisterToVariable(char* varName, FILE* fout)
@@ -453,6 +454,12 @@ void processJMP(TAC* tac, FILE* fout)
     jumpStr(tac->res->text, fout);
 }
 
+void processReturn(TAC* tac, FILE* fout)
+{
+    processOperandToFloatRegister(tac->res, DEFAULT_REGISTER, fout);
+    jump(actualFunctionLabel, fout);
+}
+
 void processRead(TAC* tac, FILE* fout)
 {
     readToVariable(tac->res->text, fout);
@@ -617,14 +624,24 @@ void generateASM(TAC* first)
     switch (tac->type)
     {
     case TAC_BEGINFUN:
+        actualFunctionLabel = actualLabel++;
         fprintf(fout, "%s:\n", tac->res->text);
-        fprintf(fout, ".LFB0:\n");
+        if (strcmp(tac->res->text, "main") == 0)
+        {
+            isMainFunction = 1;
+        }
+        
         fprintf(fout, "\tpushq	%%rbp\n");
         fprintf(fout, "\tmovq	%%rsp, %%rbp\n\n");
       break;
     
     case TAC_ENDFUN:
-        // movl	$0, %eax pra retornar algo
+        label(actualFunctionLabel, fout);
+        if (strcmp(tac->res->text, "main") == 0)
+        {
+            isMainFunction = 0;
+            floatRegisterToIntRegister(fout);
+        }
         fprintf(fout, "\tpopq	%%rbp\n");
         fprintf(fout, "\tret\n");
         break;
@@ -711,6 +728,10 @@ void generateASM(TAC* first)
     
     case TAC_READ:
         processRead(tac, fout);
+        break;
+    
+    case TAC_RETURN:
+        processReturn(tac, fout);
         break;
     
     default:
