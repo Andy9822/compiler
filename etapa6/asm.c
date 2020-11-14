@@ -99,6 +99,11 @@ void printWhiteLine(FILE* fout)
     fprintf(fout, "\n");
 }
 
+void callFunction(char* funcName, FILE* fout)
+{
+    fprintf(fout, "\tcall   %s\n", funcName);
+}
+
 void compareFloatRegister(FILE* fout)
 {
     fprintf(fout, "\tucomiss	%%xmm0, %%xmm1\n");
@@ -460,6 +465,12 @@ void processReturn(TAC* tac, FILE* fout)
     jump(actualFunctionLabel, fout);
 }
 
+void processFuncCall(TAC* tac, FILE* fout)
+{
+    callFunction(tac->op1->text, fout);
+    saveFloatRegisterToFloatVar(tac->res->text, fout);
+}
+
 void processRead(TAC* tac, FILE* fout)
 {
     readToVariable(tac->res->text, fout);
@@ -732,6 +743,10 @@ void generateASM(TAC* first)
     
     case TAC_RETURN:
         processReturn(tac, fout);
+        break;
+    
+    case TAC_FUNCALL:
+        processFuncCall(tac, fout);
         break;
     
     default:
