@@ -141,6 +141,11 @@ void jumpZeroStr(char* labelName, FILE* fout)
 	fprintf(fout, "\tjz	%s\n", labelName);
 }
 
+void jumpStr(char* labelName, FILE* fout)
+{
+	fprintf(fout, "\tjmp	%s\n", labelName);
+}
+
 void jumpNotZero(long int label, FILE* fout)
 {
 	fprintf(fout, "\tjnz    .L%li\n", label);
@@ -435,6 +440,11 @@ void processJMPF(TAC* tac, FILE* fout)
     jumpZeroStr(tac->res->text, fout);
 }
 
+void processJMP(TAC* tac, FILE* fout)
+{
+    jumpStr(tac->res->text, fout);
+}
+
 void processNot(TAC* tac, FILE* fout)
 {
     int labelNotZero = actualLabel++;
@@ -675,6 +685,10 @@ void generateASM(TAC* first)
     
     case TAC_LABEL:
         generateLabel(tac->res->text, fout);
+        break;
+    
+    case TAC_JMP:
+        processJMP(tac, fout);
         break;
     
     default:
