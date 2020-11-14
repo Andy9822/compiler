@@ -11,6 +11,7 @@
 #define DATATYPE_TEMP_FLOAT DATATYPE_UNDEFINED
 #define FLOAT_TEMP_VAR "floatTemp"
 #define DEFAULT_REGISTER 0
+#define ALTERNATIVE_REGISTER 1
 
 void generateASM(TAC* first);
 

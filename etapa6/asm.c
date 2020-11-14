@@ -53,6 +53,14 @@ void floatVarToFloatRegister(char* varName, int registerNumber, FILE* fout)
     fprintf(fout, "\tmovss	_%s(%%rip), %%xmm%d\n", varName, registerNumber);
 }
 
+void floatVecToFloatRegister(char* varName, int registerNumber, FILE* fout)
+{
+    fprintf(fout, "\tcltq\n"); 
+    fprintf(fout, "\tleaq	0(,%%rax,4), %%rdx\n"); 
+    fprintf(fout, "\tleaq	_%s(%%rip), %%rax\n", varName); 
+    fprintf(fout, "\tmovss	(%%rdx,%%rax), %%xmm%d\n", registerNumber); 
+}
+
 void floatRegisterToIntRegister(FILE* fout)
 {
     fprintf(fout, "\tcvttss2sil	%%xmm0, %%eax\n");
@@ -480,6 +488,14 @@ void processRead(TAC* tac, FILE* fout)
     }
 }
 
+void processVectorAccess(TAC* tac, FILE* fout)
+{
+    processOperandToFloatRegister(tac->op2, DEFAULT_REGISTER, fout);
+    floatRegisterToIntRegister(fout);
+    floatVecToFloatRegister(tac->op1->text, DEFAULT_REGISTER, fout);
+    saveFloatRegisterToFloatVar(tac->res->text, fout);
+}
+
 void processNot(TAC* tac, FILE* fout)
 {
     int labelNotZero = actualLabel++;
@@ -747,6 +763,10 @@ void generateASM(TAC* first)
     
     case TAC_FUNCALL:
         processFuncCall(tac, fout);
+        break;
+    
+    case TAC_VEC_ACCESS:
+        processVectorAccess(tac, fout);
         break;
     
     default:
