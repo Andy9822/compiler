@@ -55,23 +55,28 @@ void floatVarToFloatRegister(char* varName, int registerNumber, FILE* fout)
     fprintf(fout, "\tmovss	_%s(%%rip), %%xmm%d\n", varName, registerNumber);
 }
 
-void floatVecToFloatRegister(char* varName, int registerNumber, FILE* fout)
+void vectorIndexAdressToRegisters(char* varName, FILE* fout)
 {
-    fprintf(fout, "\tcltq\n"); 
+    fprintf(fout, "\tcltq\n");
     fprintf(fout, "\tleaq	0(,%%rax,4), %%rdx\n"); 
     fprintf(fout, "\tleaq	_%s(%%rip), %%rax\n", varName); 
+}
+
+void floatVecToFloatRegister(char* varName, int registerNumber, FILE* fout)
+{
+    vectorIndexAdressToRegisters(varName, fout);
     fprintf(fout, "\tmovss	(%%rdx,%%rax), %%xmm%d\n", registerNumber); 
 }
 
-void floatRegisterToIntRegister(FILE* fout)
+void floatRegisterToIntRegister(int registerNumber, FILE* fout)
 {
-    fprintf(fout, "\tcvttss2sil	%%xmm0, %%eax\n");
+    fprintf(fout, "\tcvttss2sil	%%xmm%d, %%eax\n", registerNumber);
 }
 
 void floatVarToIntVar(char* src, char* dst, int registerNumber, FILE* fout)
 {
     floatVarToFloatRegister(src, registerNumber, fout);
-    floatRegisterToIntRegister(fout);
+    floatRegisterToIntRegister(DEFAULT_REGISTER, fout);
     saveIntRegisterToVariable(dst, fout);
 }
 
@@ -94,8 +99,22 @@ void saveFloatRegisterToFloatVar(char* resultVar, FILE* fout)
 
 void saveFloatRegisterToIntVar(char* varName, FILE* fout)
 {
-    floatRegisterToIntRegister(fout);
+    floatRegisterToIntRegister(DEFAULT_REGISTER, fout);
     saveIntRegisterToVariable(varName, fout);
+}
+
+void saveFloatRegisterToVec(char* dest, int isFloatVec, FILE* fout)
+{
+    if (!isFloatVec)
+    {
+        floatRegisterToIntRegister(DEFAULT_REGISTER, fout);
+        intRegisterToFloatRegister(DEFAULT_REGISTER, fout);
+        // TODO se quiser imprimir no tipo certo, aqui adicionar resto de lógica própria
+    }
+
+    floatRegisterToIntRegister(ALTERNATIVE_REGISTER, fout);
+    vectorIndexAdressToRegisters(dest, fout);
+    fprintf(fout, "\tmovss	%%xmm%d, (%%rdx,%%rax)\n", DEFAULT_REGISTER);
 }
 
 void intNumToFloatVar(char* varName, long int value, FILE* fout) 
@@ -331,6 +350,13 @@ void processCopy(TAC* tac, FILE* fout)
             break;
     }
 }
+void processCopyVec(TAC* tac, FILE* fout) 
+{
+    processOperandToFloatRegister(tac->op1, ALTERNATIVE_REGISTER, fout);
+    processOperandToFloatRegister(tac->op2, DEFAULT_REGISTER, fout);
+    saveFloatRegisterToVec(tac->res->text, isFloatVariable(tac->res->data_type), fout);
+}
+
 
 void testAndZeroOperator(HASH_NODE* op, FILE* fout)
 {
@@ -521,9 +547,14 @@ void processRead(TAC* tac, FILE* fout)
 void processVectorAccess(TAC* tac, FILE* fout)
 {
     processOperandToFloatRegister(tac->op2, DEFAULT_REGISTER, fout);
-    floatRegisterToIntRegister(fout);
+    floatRegisterToIntRegister(DEFAULT_REGISTER, fout);
     floatVecToFloatRegister(tac->op1->text, DEFAULT_REGISTER, fout);
     saveFloatRegisterToFloatVar(tac->res->text, fout);
+    // TODO in case print chars
+    // if tac->res->data_type == DATATYPE_CHAR
+    // floatRegisterToCharVar()
+    // tac->res->data_type = tac->op1->data_type;
+    // Ajustar print DATATYPE_CHAR
 }
 
 void processNot(TAC* tac, FILE* fout)
@@ -729,6 +760,7 @@ void generateGlobalVariables(FILE* fout)
 
     // Print own variables for easier manipulation
     fprintf(fout, "floatTemp:\t.long\t0\n");
+    fprintf(fout, "_0myIntTemp:\t.long\t0\n");
     fprintf(fout, "myCharTemp:\t.byte\t0\n");
     fprintf(fout, ".true_string:	.string	\"TRUE\"\n");
     fprintf(fout, ".false_string:	.string	\"FALSE\"\n");
@@ -787,7 +819,7 @@ void generateASM(TAC* first)
                 if (strcmp(tac->res->text, "main") == 0)
                 {
                     isMainFunction = 0;
-                    floatRegisterToIntRegister(fout);
+                    floatRegisterToIntRegister(DEFAULT_REGISTER, fout);
                 }
                 fprintf(fout, "\tpopq	%%rbp\n");
                 fprintf(fout, "\tret\n");
@@ -808,6 +840,11 @@ void generateASM(TAC* first)
 
             case TAC_COPY:
                 processCopy(tac, fout);
+                printWhiteLine(fout);
+                break;
+
+            case TAC_COPY_VEC:
+                processCopyVec(tac, fout);
                 printWhiteLine(fout);
                 break;
 
