@@ -41,20 +41,21 @@ typedef struct local_variable {
   struct local_variable *next;
 } LOCAL_VARIABLE;
 
-typedef struct vec_values {
+typedef struct values_list {
   char* value;
-  struct vec_values *next;
-} VEC_VALUES;
+  struct values_list *next;
+} VALUES_LIST;
 
 typedef struct hash_node {
   int type;
   int data_type;
+  long int id;
   long int idx;
   char *text;
   char* init_value;
   struct hash_node *next;
   struct local_variable * scope_variables;
-  struct vec_values * vec_init_value;
+  struct VALUES_LIST * vec_init_value;
 } HASH_NODE;
 
 HASH_NODE *HASH_TABLE[HASH_SIZE];
@@ -74,4 +75,9 @@ int get_scope_len(HASH_NODE* node);
 int get_scope_index(HASH_NODE* node, int idx);
 char* get_vec_value_at_index(HASH_NODE* node, long int idx);
 char* get_scope_var_name_at_index(HASH_NODE* node, int idx);
+void setId(HASH_NODE* node, long int* idx);
+
+// List of values function
+void insertValueinList(VALUES_LIST* list, char* value);
+VALUES_LIST* createValuesListNode(char* value);
 #endif

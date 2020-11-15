@@ -52,6 +52,7 @@ HASH_NODE * hashInsert(char string[], int type) {
     new_node->init_value = NULL;
     new_node->vec_init_value = NULL;
     new_node->idx = 0;
+    new_node->id = -1;
     HASH_TABLE[index] = new_node;
   }
   
@@ -127,7 +128,7 @@ void insert_local_variable(HASH_NODE* node, char* local_variable_name, int local
 
 void insert_vec_value(HASH_NODE* node, char* vec_value)
 {
-  VEC_VALUES* new_vec_value = (VEC_VALUES *) calloc(1,sizeof(VEC_VALUES));
+  VALUES_LIST* new_vec_value = (VALUES_LIST *) calloc(1,sizeof(VALUES_LIST));
   new_vec_value->value = (char *) calloc(strlen(vec_value)+1, sizeof(char));
   strcpy(new_vec_value->value, vec_value);
   new_vec_value->next = NULL;
@@ -138,7 +139,7 @@ void insert_vec_value(HASH_NODE* node, char* vec_value)
     return;
   }
 
-  VEC_VALUES* iterator = node->vec_init_value;
+  VALUES_LIST* iterator = node->vec_init_value;
   while (iterator->next)
   {
     iterator = iterator->next;
@@ -184,7 +185,7 @@ int get_scope_len(HASH_NODE* node)
 
 char* get_vec_value_at_index(HASH_NODE* node, long int idx)
 {
-  VEC_VALUES* iterator;
+  VALUES_LIST* iterator;
   iterator = node->vec_init_value;
 
   long int i;
@@ -259,4 +260,41 @@ HASH_NODE *makeLabel()
 
   sprintf(buffer, "myWeeirL_abael%d", serial++);
   return hashInsert(buffer, SYMBOL_LABEL);
+}
+
+void setId(HASH_NODE* node, long int* idx) 
+{
+  if (!node) return;
+  if (node->id != -1) return;
+
+  node->id = *idx;
+  *idx+=1;
+
+  return;
+}
+
+// List of values function
+VALUES_LIST* createValuesListNode(char* value)
+{
+    VALUES_LIST* new_value = (VALUES_LIST *) calloc(1,sizeof(VALUES_LIST));
+    new_value->value = (char *) calloc(strlen(value)+1, sizeof(char));
+    strcpy(new_value->value, value);
+    new_value->next = NULL;
+
+    return new_value;
+}
+
+void insertValueinList(VALUES_LIST* list, char* value)
+{
+  VALUES_LIST* new_value = createValuesListNode(value);
+  
+  VALUES_LIST* iterator = list;
+  while (iterator->next)
+  {
+    iterator = iterator->next;
+  }
+
+  iterator->next = new_value;
+  
+  return;
 }

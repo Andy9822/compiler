@@ -5,7 +5,9 @@
 
 long int actualFunctionLabel = 0;
 long int actualLabel = 0;
+long int actualLiteralLabel = 0;
 int isMainFunction = 0;
+VALUES_LIST* literals_to_print = NULL;
 
 ////////////////////// ASM EXPLICIT COMMANDS /////////////////////
 void saveIntRegisterToVariable(char* varName, FILE* fout)
@@ -191,6 +193,13 @@ void label(long int label, FILE* fout)
 void generateLabel(char* labelName, FILE* fout)
 {
     fprintf(fout, "%s:\n", labelName);
+}
+
+void callPrintLiteral(long int label, FILE* fout)
+{
+    fprintf(fout, "\tmovq	literal%li(%%rip), %%rax\n", label);
+    fprintf(fout, "\tmovq	%%rax, %%rdi\n");
+	fprintf(fout, "\tcall	puts@PLT\n");
 }
         
 void readCharToVariable(char* varName, FILE* fout)
@@ -577,6 +586,28 @@ void printVariable(TAC* tac, FILE* fout)
     }
 }
 
+void printLiteral(TAC* tac, FILE* fout)
+{
+    HASH_NODE* node = hashFind(tac->res->text);
+    long int actualID = actualLiteralLabel;
+    setId(node, &actualLiteralLabel);
+    if (actualID == actualLiteralLabel)
+    {
+        return;
+    }
+    
+    if (literals_to_print == NULL)
+    {
+        literals_to_print = createValuesListNode(tac->res->text);
+    }
+    else
+    {
+        insertValueinList(literals_to_print, tac->res->text);
+    }
+
+    callPrintLiteral(actualLiteralLabel-1, fout);
+}
+
 void generateNormalVariable(HASH_NODE* node,FILE* fout)
 {
     if (isNumberType(node->data_type))
@@ -640,6 +671,26 @@ void generateNormalVariable(HASH_NODE* node,FILE* fout)
     }
 }
 
+void generateGlobalStrings(FILE* fout)
+{
+    fprintf(fout, "\n# String literals to be printed\n");
+    VALUES_LIST* iterator;
+    for (iterator = literals_to_print; iterator; iterator = iterator->next)
+    {
+        long int id = hashFind(iterator->value)->id;
+
+        if (iterator->value[0] != '\"')
+        {
+            fprintf(fout, ".literal_value%li:\t.string	\"%s\"\n", id, iterator->value);
+        }
+        else
+        {
+            fprintf(fout, ".literal_value%li:\t.string	%s\n", id, iterator->value);
+        }
+        fprintf(fout, "literal%li:\t.quad\t.literal_value%li\n", id, id);
+    }
+}
+
 void generateVectorVariable(HASH_NODE* node, FILE* fout)
 {
     if(node->idx == 0) return;
@@ -657,6 +708,7 @@ void generateVectorVariable(HASH_NODE* node, FILE* fout)
 
 void generateGlobalVariables(FILE* fout)
 {
+    fprintf(fout, "\n# Global variables\n");
     // Print Hash Table Variables
     int i;
     HASH_NODE* node;
@@ -691,155 +743,164 @@ void generateGlobalVariables(FILE* fout)
 
 void generateASM(TAC* first)
 {
-  TAC* tac;
+    TAC* tac;
 
-  FILE *fout;
-  fout = fopen("my_assembly.s", "w");
+    FILE *fout;
+    fout = fopen("my_assembly.s", "w");
 
-  // Init headers
-  fprintf(fout, ".section	.rodata\n");
-  fprintf(fout, ".globl	main\n");
-  fprintf(fout, ".data\n\n");
-  fprintf(fout, ".print_int_string:\n");
-  fprintf(fout, "\t.string	\"%%d\\n\"\n\n");
-  fprintf(fout, ".print_char_string:\n");
-  fprintf(fout, "\t.string	\"%%c\\n\"\n\n");
-  fprintf(fout, ".print_float_string:\n");
-  fprintf(fout, "\t.string	\"%%f\\n\"\n\n");
-  fprintf(fout, ".print_string:\n");
-  fprintf(fout, "\t.string	\"%%s\\n\"\n\n");
+    // Init headers
+    fprintf(fout, "# Data section\n");
+    fprintf(fout, ".section	.rodata\n");
+    fprintf(fout, ".globl	main\n");
+    fprintf(fout, ".data\n\n");
+    fprintf(fout, ".print_int_string:\n");
+    fprintf(fout, "\t.string	\"%%d\\n\"\n\n");
+    fprintf(fout, ".print_char_string:\n");
+    fprintf(fout, "\t.string	\"%%c\\n\"\n\n");
+    fprintf(fout, ".print_float_string:\n");
+    fprintf(fout, "\t.string	\"%%f\\n\"\n\n");
+    fprintf(fout, ".print_string:\n");
+    fprintf(fout, "\t.string	\"%%s\\n\"\n\n");
 
-  // Hash Table
-  generateGlobalVariables(fout);
-  
-  // Each TAC
-  for (tac = first; tac; tac = tac->next)
-  {
-    switch (tac->type)
+    // Hash Table
+    generateGlobalVariables(fout);
+
+    // Each TAC
+    for (tac = first; tac; tac = tac->next)
     {
-    case TAC_BEGINFUN:
-        actualFunctionLabel = actualLabel++;
-        fprintf(fout, "%s:\n", tac->res->text);
-        if (strcmp(tac->res->text, "main") == 0)
+        switch (tac->type)
         {
-            isMainFunction = 1;
-        }
-        
-        fprintf(fout, "\tpushq	%%rbp\n");
-        fprintf(fout, "\tmovq	%%rsp, %%rbp\n\n");
-      break;
-    
-    case TAC_ENDFUN:
-        label(actualFunctionLabel, fout);
-        if (strcmp(tac->res->text, "main") == 0)
-        {
-            isMainFunction = 0;
-            floatRegisterToIntRegister(fout);
-        }
-        fprintf(fout, "\tpopq	%%rbp\n");
-        fprintf(fout, "\tret\n");
-        break;
-    
-    case TAC_PRINT:
-        if (tac->res->type == SYMBOL_VARIABLE)
-        {
-            printVariable(tac, fout);
-        }
-            
-      break;
-    
-    case TAC_COPY:
-        processCopy(tac, fout);
-        printWhiteLine(fout);
-        break;
-    
-    case TAC_ADD:
-        processArithmeticOperation(tac, "add", fout);
-        printWhiteLine(fout);
-        break;
-    case TAC_SUB:
-        processArithmeticOperation(tac, "sub", fout);
-        printWhiteLine(fout);
-        break;
-    
-    case TAC_MULT:
-        processArithmeticOperation(tac, "mul", fout);
-        printWhiteLine(fout);
-        break;
-    
-    case TAC_DIV:
-        processArithmeticOperation(tac, "div", fout);
-        printWhiteLine(fout);
-        break;
-    
-    case TAC_AND:
-        processAnd(tac, fout);
-        break;
-    
-    case TAC_OR:
-        processOr(tac, fout);
-        break;
-    
-    case TAC_EQ:
-        processEq(tac, fout);
-        break;
-    
-    case TAC_DIF:
-        processDiff(tac, fout);
-        break;
-    
-    case TAC_GE:
-        processGE(tac, fout);
-        break;
-    
-    case TAC_LE:
-        processLE(tac, fout);
-        break;
-    
-    case TAC_NOT:
-        processNot(tac, fout);
-        break;
-    
-    case TAC_GREATER:
-        processGT(tac, fout);
-        break;
-    
-    case TAC_LESSER:
-        processLT(tac, fout);
-        break;
-    
-    case TAC_JMP_FALSE:
-        processJMPF(tac, fout);
-        break;
-    
-    case TAC_LABEL:
-        generateLabel(tac->res->text, fout);
-        break;
-    
-    case TAC_JMP:
-        processJMP(tac, fout);
-        break;
-    
-    case TAC_READ:
-        processRead(tac, fout);
-        break;
-    
-    case TAC_RETURN:
-        processReturn(tac, fout);
-        break;
-    
-    case TAC_FUNCALL:
-        processFuncCall(tac, fout);
-        break;
-    
-    case TAC_VEC_ACCESS:
-        processVectorAccess(tac, fout);
-        break;
-    
-    default:
-      break;
-    }
-  }
+            case TAC_BEGINFUN:
+                actualFunctionLabel = actualLabel++;
+                fprintf(fout, "%s:\n", tac->res->text);
+                if (strcmp(tac->res->text, "main") == 0)
+                {
+                    isMainFunction = 1;
+                }
+                
+                fprintf(fout, "\tpushq	%%rbp\n");
+                fprintf(fout, "\tmovq	%%rsp, %%rbp\n\n");
+                break;
 
-  fclose(fout);
-}
+            case TAC_ENDFUN:
+                label(actualFunctionLabel, fout);
+                if (strcmp(tac->res->text, "main") == 0)
+                {
+                    isMainFunction = 0;
+                    floatRegisterToIntRegister(fout);
+                }
+                fprintf(fout, "\tpopq	%%rbp\n");
+                fprintf(fout, "\tret\n");
+                break;
+
+            case TAC_PRINT:
+                if (tac->res->type == SYMBOL_VARIABLE)
+                {
+                    printVariable(tac, fout);
+                }
+                else
+                {
+                    printLiteral(tac, fout);
+                }
+                
+                    
+                break;
+
+            case TAC_COPY:
+                processCopy(tac, fout);
+                printWhiteLine(fout);
+                break;
+
+            case TAC_ADD:
+                processArithmeticOperation(tac, "add", fout);
+                printWhiteLine(fout);
+                break;
+            case TAC_SUB:
+                processArithmeticOperation(tac, "sub", fout);
+                printWhiteLine(fout);
+                break;
+
+            case TAC_MULT:
+                processArithmeticOperation(tac, "mul", fout);
+                printWhiteLine(fout);
+                break;
+
+            case TAC_DIV:
+                processArithmeticOperation(tac, "div", fout);
+                printWhiteLine(fout);
+                break;
+
+            case TAC_AND:
+                processAnd(tac, fout);
+                break;
+
+            case TAC_OR:
+                processOr(tac, fout);
+                break;
+
+            case TAC_EQ:
+                processEq(tac, fout);
+                break;
+
+            case TAC_DIF:
+                processDiff(tac, fout);
+                break;
+
+            case TAC_GE:
+                processGE(tac, fout);
+                break;
+
+            case TAC_LE:
+                processLE(tac, fout);
+                break;
+
+            case TAC_NOT:
+                processNot(tac, fout);
+                break;
+
+            case TAC_GREATER:
+                processGT(tac, fout);
+                break;
+
+            case TAC_LESSER:
+                processLT(tac, fout);
+                break;
+
+            case TAC_JMP_FALSE:
+                processJMPF(tac, fout);
+                break;
+
+            case TAC_LABEL:
+                generateLabel(tac->res->text, fout);
+                break;
+
+            case TAC_JMP:
+                processJMP(tac, fout);
+                break;
+
+            case TAC_READ:
+                processRead(tac, fout);
+                break;
+
+            case TAC_RETURN:
+                processReturn(tac, fout);
+                break;
+
+            case TAC_FUNCALL:
+                processFuncCall(tac, fout);
+                break;
+
+            case TAC_VEC_ACCESS:
+                processVectorAccess(tac, fout);
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    // String literal to be print
+    generateGlobalStrings(fout);
+
+    fclose(fout);
+    }
