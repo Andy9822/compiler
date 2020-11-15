@@ -496,7 +496,7 @@ void processRead(TAC* tac, FILE* fout)
     {
         readCharToVariable(tac->res->text, fout);
     }
-    
+
     else
     {
         readToVariable(tac->res->text, fout);
@@ -568,16 +568,12 @@ void printVariable(TAC* tac, FILE* fout)
             
         break;
         
+        case DATATYPE_UNDEFINED: // Variáveis temporárias
         case DATATYPE_FLOAT:
             floatVarToFloatRegister(tac->res->text, 0, fout);
             fprintf(fout, "\tcvtss2sd	%%xmm0, %%xmm0\n");
             callPrintFunction(".print_float_string", fout);
         break;
-
-        // case DATATYPE_BOOL: ;    TODO se der tempo, printar em bool mesmo: TRUE ou FALSE
-        //     int boolValue = atoi(tac->res->text);
-        //     printf("print bool %s with value %d\n", tac->res->text, boolValue);
-        // break;
     }
 }
 
