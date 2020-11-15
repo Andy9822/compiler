@@ -566,19 +566,47 @@ void generateNormalVariable(HASH_NODE* node,FILE* fout)
     {
         if (isCharValue(node->init_value))
         {
-            fprintf(fout, "_%s:\t.long\t%i\n", node->text, node->init_value[1]);
+            if (isIntVariable(node->data_type))
+            {
+                fprintf(fout, "_%s:\t.long\t%i\n", node->text, node->init_value[1]);
+            }
+            else
+            {
+                float floatValue = node->init_value[1];
+                long int value = *(int*) &floatValue;
+                fprintf(fout, "_%s:\t.long\t%li\n", node->text, value);
+            }
         }
         
         else if (!isFloatValue(node->init_value))
         {
-            long int init_value = strtol(node->init_value, NULL, 16);
-            fprintf(fout, "_%s:\t.long\t%li\n", node->text, strtol(node->init_value, NULL, 16));
+            if (isIntVariable(node->data_type))
+            {
+                long int init_value = strtol(node->init_value, NULL, 16);
+                fprintf(fout, "_%s:\t.long\t%li\n", node->text, strtol(node->init_value, NULL, 16));
+            }
+            else
+            {
+                float floatValue = strtol(node->init_value, NULL, 16);
+                long int value = *(int*) &floatValue;
+                fprintf(fout, "_%s:\t.long\t%li\n", node->text, value);
+            }
         }
 
         else
-        {           
-            int floatHexinInt = castFloatHexStringToInt(node->init_value);
-            fprintf(fout, "_%s:\t.long\t%d\n", node->text, floatHexinInt);
+        {  
+            if (isIntVariable(node->data_type))
+            {
+                int floatHexinInt = castFloatHexStringToInt(node->init_value);
+                float floatValue = *(float*) &floatHexinInt;
+                int value = floatValue;
+                fprintf(fout, "_%s:\t.long\t%d\n", node->text, value);
+            }
+            else
+            {
+                int floatHexinInt = castFloatHexStringToInt(node->init_value);
+                fprintf(fout, "_%s:\t.long\t%d\n", node->text, floatHexinInt);
+            }
         }
         
     }
