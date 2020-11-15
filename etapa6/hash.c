@@ -50,6 +50,8 @@ HASH_NODE * hashInsert(char string[], int type) {
     new_node->data_type = DATATYPE_UNDEFINED;
     new_node->scope_variables = NULL;
     new_node->init_value = NULL;
+    new_node->vec_init_value = NULL;
+    new_node->idx = 0;
     HASH_TABLE[index] = new_node;
   }
   
@@ -94,7 +96,7 @@ void insert_local_variable(HASH_NODE* node, char* local_variable_name, int local
   LOCAL_VARIABLE *new_variable;
   new_variable = (LOCAL_VARIABLE *) calloc(1,sizeof(LOCAL_VARIABLE));
   new_variable->text = (char *) calloc(strlen(local_variable_name)+1, sizeof(char));
-  new_variable->text = strcpy(new_variable->text, local_variable_name);
+  strcpy(new_variable->text, local_variable_name);
   new_variable->type = local_variable_type;
   new_variable->next = NULL;
   
@@ -121,6 +123,30 @@ void insert_local_variable(HASH_NODE* node, char* local_variable_name, int local
   // Atualiza o nodo daquele identificador para ter o tipo
   HASH_NODE * local_var_node = hashFind(local_variable_name);
   local_var_node->type = local_variable_type;
+}
+
+void insert_vec_value(HASH_NODE* node, char* vec_value)
+{
+  VEC_VALUES* new_vec_value = (VEC_VALUES *) calloc(1,sizeof(VEC_VALUES));
+  new_vec_value->value = (char *) calloc(strlen(vec_value)+1, sizeof(char));
+  strcpy(new_vec_value->value, vec_value);
+  new_vec_value->next = NULL;
+
+  if (node->vec_init_value == NULL)
+  {
+    node->vec_init_value = new_vec_value;
+    return;
+  }
+
+  VEC_VALUES* iterator = node->vec_init_value;
+  while (iterator->next)
+  {
+    iterator = iterator->next;
+  }
+  
+  iterator->next = new_vec_value;
+
+  return;
 }
 
 void print_scope_variables(HASH_NODE* node)
@@ -154,6 +180,21 @@ int get_scope_len(HASH_NODE* node)
   }
 
   return i;
+}
+
+char* get_vec_value_at_index(HASH_NODE* node, long int idx)
+{
+  VEC_VALUES* iterator;
+  iterator = node->vec_init_value;
+
+  long int i;
+
+  for (i = 0; i < idx; i++)
+  {
+    iterator = iterator->next;
+  }
+  
+  return iterator->value;
 }
 
 int get_scope_index(HASH_NODE* node, int idx)

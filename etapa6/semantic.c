@@ -27,6 +27,29 @@ void process_local_variable(AST * param_node, AST * func_node)
     insert_local_variable(func_node->symbol, var_name, var_type);
 }
 
+void init_zero_vec_dec(HASH_NODE* hash_node, char* size)
+{
+    int i;
+    long int vec_size = strtol(size, NULL, 16);
+
+    for (i = 0; i < vec_size; i++)
+    {
+        insert_vec_value(hash_node, "0");
+    }
+    
+}
+
+void fill_vec_dec_values(HASH_NODE* hash_node, char* size, AST* value_node)
+{
+    long int vec_size = strtol(size, NULL, 16);
+    hash_node->idx = vec_size;
+    while (value_node)
+    {
+        insert_vec_value(hash_node, value_node->son[0]->symbol->text);
+        value_node = value_node->son[1];
+    }
+}
+
 void check_and_set_declarations(AST *node)
 {
     int i;
@@ -54,6 +77,8 @@ void check_and_set_declarations(AST *node)
             break;
 
         case AST_VEC_INIT:
+            fill_vec_dec_values(node->son[0]->son[0]->symbol, node->son[1]->symbol->text, node->son[2]);
+            // TODO percorrer AST_VEC_INIT_VALUES e colocar somehow no HASH_NODE
         case AST_VEC_DEC:
             if (node->son[0]->son[0]->symbol->type != SYMBOL_IDENTIFIER)
             {
@@ -62,6 +87,11 @@ void check_and_set_declarations(AST *node)
             }
             node->son[0]->son[0]->symbol->type = SYMBOL_VECTOR;
             node->son[0]->son[0]->symbol->data_type = getDatatypeFromSymbol(node->son[0]->son[1]->symbol->type);
+            if (node->type == AST_VEC_DEC)
+            {
+                init_zero_vec_dec(node->son[0]->son[0]->symbol, node->son[1]->symbol->text);
+            }
+            
             break;
 
 

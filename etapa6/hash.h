@@ -41,13 +41,20 @@ typedef struct local_variable {
   struct local_variable *next;
 } LOCAL_VARIABLE;
 
+typedef struct vec_values {
+  char* value;
+  struct vec_values *next;
+} VEC_VALUES;
+
 typedef struct hash_node {
   int type;
   int data_type;
+  long int idx;
   char *text;
   char* init_value;
   struct hash_node *next;
   struct local_variable * scope_variables;
+  struct vec_values * vec_init_value;
 } HASH_NODE;
 
 HASH_NODE *HASH_TABLE[HASH_SIZE];
@@ -61,8 +68,10 @@ HASH_NODE *makeLabel();
 void hashPrint();
 int hash_check_undeclared();
 void insert_local_variable(HASH_NODE* node, char* local_variable_name, int local_variable_type);
+void insert_vec_value(HASH_NODE* node, char* vec_value);
 void print_scope_variables(HASH_NODE* node);
 int get_scope_len(HASH_NODE* node);
 int get_scope_index(HASH_NODE* node, int idx);
+char* get_vec_value_at_index(HASH_NODE* node, long int idx);
 char* get_scope_var_name_at_index(HASH_NODE* node, int idx);
 #endif
