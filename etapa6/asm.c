@@ -595,6 +595,21 @@ void generateNormalVariable(HASH_NODE* node,FILE* fout)
     }
 }
 
+void generateVectorVariable(HASH_NODE* node, FILE* fout)
+{
+    if(node->idx == 0) return;
+    int i;
+    long int size = node->idx;
+    
+    fprintf(fout, "_%s:\n", node->text);
+    for (i = 0; i < size; i++)
+    {
+        float vec_value_float = strtol(get_vec_value_at_index(node, i), NULL, 16);
+        long int vec_value_int = *(int*) &vec_value_float;
+        fprintf(fout, "\t.long	%li\n", vec_value_int);
+    }
+}
+
 void generateGlobalVariables(FILE* fout)
 {
     // Print Hash Table Variables
@@ -607,6 +622,10 @@ void generateGlobalVariables(FILE* fout)
             if (node->type == SYMBOL_VARIABLE)
             {
                 generateNormalVariable(node, fout);
+            }
+            else if (node->type == SYMBOL_VECTOR)
+            {
+                generateVectorVariable(node, fout);                                
             }
         }
     }
