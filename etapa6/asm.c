@@ -192,6 +192,17 @@ void generateLabel(char* labelName, FILE* fout)
 {
     fprintf(fout, "%s:\n", labelName);
 }
+        
+void readCharToVariable(char* varName, FILE* fout)
+{
+	 fprintf(fout, "\tleaq	myCharTemp(%%rip), %%rsi\n");
+	 fprintf(fout, "\tleaq	.scanf_char(%%rip), %%rdi\n");
+	 fprintf(fout, "\tmovl	$0, %%eax\n");
+	 fprintf(fout, "\tcall	__isoc99_scanf@PLT\n");
+	 fprintf(fout, "\tmovzbl	myCharTemp(%%rip), %%eax\n");
+	 fprintf(fout, "\tmovsbl	%%al, %%eax\n");
+	 fprintf(fout, "\tmovl	%%eax, _%s(%%rip)\n", varName);
+}
 ////////////////////// END ASM EXPLICIT COMMANDS /////////////////////
 
 
@@ -481,11 +492,21 @@ void processFuncCall(TAC* tac, FILE* fout)
 
 void processRead(TAC* tac, FILE* fout)
 {
-    readToVariable(tac->res->text, fout);
-    if (isIntVariable(tac->res->data_type) || tac->res->data_type == DATATYPE_BOOL)
+    if (tac->res->data_type == DATATYPE_CHAR)
     {
-        floatVarToIntVar(tac->res->text, tac->res->text, DEFAULT_REGISTER, fout);
+        readCharToVariable(tac->res->text, fout);
     }
+    
+    else
+    {
+        readToVariable(tac->res->text, fout);
+        if (isIntVariable(tac->res->data_type) || tac->res->data_type == DATATYPE_BOOL)
+        {
+            floatVarToIntVar(tac->res->text, tac->res->text, DEFAULT_REGISTER, fout);
+        }
+    }
+    
+    
 }
 
 void processVectorAccess(TAC* tac, FILE* fout)
@@ -660,11 +681,14 @@ void generateGlobalVariables(FILE* fout)
 
     // Print own variables for easier manipulation
     fprintf(fout, "floatTemp:\t.long\t0\n");
+    fprintf(fout, "myCharTemp:\t.byte\t0\n");
     fprintf(fout, ".true_string:	.string	\"TRUE\"\n");
     fprintf(fout, ".false_string:	.string	\"FALSE\"\n");
     fprintf(fout, ".true:	.quad	.true_string\n");
     fprintf(fout, ".false:	.quad	.false_string\n");
     fprintf(fout, ".scanf_string:   .string	\"%%f\"\n");
+    fprintf(fout, ".scanf_char:    .string  \"%%c\"\n");
+
 
     fprintf(fout, "\n");
 }
