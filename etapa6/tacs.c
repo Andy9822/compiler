@@ -50,6 +50,7 @@ void tacPrint(TAC* tac)
     case TAC_BEGINFUN:   printf("TAC_BEGINFUN"); break;
     case TAC_ENDFUN:     printf("TAC_ENDFUN"); break;
     case TAC_FUNCALL:    printf("TAC_FUNCALL"); break;
+    case TAC_BEGIN_ARG:   printf("TAC_BEGIN_ARG"); break;
     case TAC_FUNC_ARG:   printf("TAC_FUNC_ARG"); break;
     case TAC_VEC_ACCESS: printf("TAC_VEC_ACCESS"); break;
     default: printf("TAC_UNDEFINED"); break;
@@ -340,8 +341,9 @@ TAC* generateCode(AST* node)
 
     case AST_FUNC_PARAMS_CALL: ;
       HASH_NODE* func_return_params_temp = makeTemp();
+      TAC* tac_begin_argv = tacCreate(TAC_BEGIN_ARG, code[0]->res, 0, 0);
       TAC* tac_func_call = tacCreate(TAC_FUNCALL, func_return_params_temp, code[0]->res, 0);
-      result = tacJoin(tacJoin(tacJoin(code[1], tacCreate(TAC_FUNC_ARG, code[1]?code[1]->res:0, 0, 0)), code[2]), tac_func_call);
+      result = tacJoin(tac_begin_argv,tacJoin(tacJoin(tacJoin(code[1], tacCreate(TAC_FUNC_ARG, code[1]?code[1]->res:0, 0, 0)), code[2]), tac_func_call));
       break;
 
     case AST_EXPRESSION_LIST: ;
