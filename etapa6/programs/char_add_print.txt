@@ -1,0 +1,11 @@
+i = int: 0FA;
+
+vec = char[3]: 47 47 47;
+myChar = char: 47;
+
+main () = int 
+{
+    print vec[0]
+    print myChar
+    
+};
