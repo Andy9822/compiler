@@ -9,6 +9,11 @@ long int actualLiteralLabel = 0;
 int isMainFunction = 0;
 VALUES_LIST* literals_to_print = NULL;
 
+HASH_NODE* actual_func_node = NULL;
+int actual_func_index = 0;
+int actual_func_params_count = 0;
+VALUES_LIST* parameters_names = NULL;
+
 ////////////////////// ASM EXPLICIT COMMANDS /////////////////////
 void saveIntRegisterToVariable(char* varName, FILE* fout)
 {
@@ -214,6 +219,19 @@ void generateLabel(char* labelName, FILE* fout)
     fprintf(fout, "%s:\n", labelName);
 }
 
+void stackPositionToFloatRegister(int position, FILE* fout)
+{
+    fprintf(fout, "\tmovss 	%d(%%rbp), %%xmm0\n", -4 * position);
+}
+void floatRegisterToStack(int registerNumber, FILE* fout)
+{
+    fprintf(fout, "\tmovss	%%xmm%d, %d(%%rbp)\n", registerNumber, -4 * actual_func_index);
+}
+
+void allocateStackSpace(FILE* fout)
+{
+    fprintf(fout, "\tsubq	$16, %%rsp\n");
+}
 void callPrintLiteral(long int label, FILE* fout)
 {
     fprintf(fout, "\tmovq	literal%li(%%rip), %%rax\n", label);
@@ -519,10 +537,105 @@ void processReturn(TAC* tac, FILE* fout)
     jump(actualFunctionLabel, fout);
 }
 
+void processFuncArg(TAC* tac, FILE* fout)
+{
+    processOperandToFloatRegister(tac->res, DEFAULT_REGISTER, fout);
+    floatRegisterToStack(DEFAULT_REGISTER, fout);
+
+    if (parameters_names == NULL)
+    {
+        parameters_names = createValuesListNode(tac->res->text);
+    }
+    else
+    {
+        insertValueinList(parameters_names, tac->res->text);
+    }
+
+    
+    
+    HASH_NODE* srcNode = hashFind(tac->res->text);
+    HASH_NODE* dstNode = hashFind(get_scope_var_name_at_index(actual_func_node, actual_func_index+1));
+
+    processOperandToFloatRegister(srcNode, DEFAULT_REGISTER, fout);
+    if (isFloatVariable(dstNode->data_type))
+    {
+        saveFloatRegisterToFloatVar(dstNode->text, fout);
+    }
+    else
+    {
+        saveFloatRegisterToIntVar(dstNode->text, fout);
+    }
+    
+    
+    actual_func_index++;
+}
+
+void processBeginArg(TAC* tac, FILE* fout)
+{
+    actual_func_node = hashFind(tac->res->text);
+    actual_func_params_count = get_scope_len(actual_func_node);
+    actual_func_index = 0;
+    allocateStackSpace(fout);
+}
+
+char* getActualParamName(TAC* tac, int i, FILE* fout)
+{
+    if (i == 0)
+    {
+        return parameters_names->value;
+    }
+    
+    else
+    {
+        int idx = 1;
+        VALUES_LIST* iterator = parameters_names->next;
+        while (idx < i)
+        {
+            iterator = iterator->next;
+            idx++;
+        }
+        return iterator->value;
+    }
+}
+
+void restoreStackVariable(HASH_NODE* node, FILE* fout)
+{
+    stackPositionToFloatRegister(actual_func_index, fout);
+
+    if (isFloatVariable(node->data_type))
+    {
+        fprintf(fout, "# entrei float\n");
+        saveFloatRegisterToFloatVar(node->text, fout);
+    }
+    else
+    {
+        saveFloatRegisterToIntVar(node->text, fout);
+    }
+}
+void restoreArgvVariables(TAC* tac, FILE* fout)
+{
+    int i;
+    HASH_NODE* node;
+    actual_func_index = 0;
+    for (i = 0; i < actual_func_params_count; i++)
+    {
+        node = hashFind(getActualParamName(tac, i, fout));
+        if (node->type == SYMBOL_VARIABLE && node->data_type != DATATYPE_UNDEFINED)
+        {
+            restoreStackVariable(node, fout); 
+        }
+        actual_func_index++;
+        
+    }
+    
+}
+
 void processFuncCall(TAC* tac, FILE* fout)
 {
     callFunction(tac->op1->text, fout);
     saveFloatRegisterToFloatVar(tac->res->text, fout);
+
+    restoreArgvVariables(tac, fout);
 }
 
 void processRead(TAC* tac, FILE* fout)
@@ -755,6 +868,10 @@ void generateGlobalVariables(FILE* fout)
             {
                 generateVectorVariable(node, fout);                                
             }
+            else if (node->type == SYMBOL_USED_LOCAL_VARIABLE)
+            {
+                fprintf(fout, "_%s:\t.long\t%i\n", node->text, 0);
+            }
         }
     }
 
@@ -820,13 +937,18 @@ void generateASM(TAC* first)
                 {
                     isMainFunction = 0;
                     floatRegisterToIntRegister(DEFAULT_REGISTER, fout);
+                    fprintf(fout, "\tleave\n");
                 }
-                fprintf(fout, "\tpopq	%%rbp\n");
+                else
+                {
+                    fprintf(fout, "\tpopq	%%rbp\n");
+                }
+                
                 fprintf(fout, "\tret\n");
                 break;
 
             case TAC_PRINT:
-                if (tac->res->type == SYMBOL_VARIABLE)
+                if (tac->res->type == SYMBOL_VARIABLE || tac->res->type == SYMBOL_USED_LOCAL_VARIABLE)
                 {
                     printVariable(tac, fout);
                 }
@@ -929,6 +1051,14 @@ void generateASM(TAC* first)
 
             case TAC_VEC_ACCESS:
                 processVectorAccess(tac, fout);
+                break;
+
+            case TAC_BEGIN_ARG:
+                processBeginArg(tac, fout);
+                break;
+
+            case TAC_FUNC_ARG:
+                processFuncArg(tac, fout);
                 break;
 
             default:

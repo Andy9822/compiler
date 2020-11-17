@@ -1,0 +1,33 @@
+c = float: 0;
+
+a = int: 8;
+b = float: 9;
+myChar = char: 47;
+
+foo (a1 = int, b1 = int, c1 = char) = int
+{
+    print "\nvalor de a1 que recebeu a", a1
+    print "valor de b1 que recebeu b", b1
+    print "valor de c1 que recebeu myChar", c1
+
+    a1 = 0     
+    b1 = 1
+    c1 = 61
+
+    print "\nvalor de a1 ao atribuir 0", a1
+    print "valor de b1 ao atribuir 1", b1
+    print "valor de c1 ao atribuir 61", c1, "\n"
+};
+
+main () = int 
+{
+    print "valor de a antes de chamar foo", a
+    print "valor de b antes de chamar foo", b
+    print "valor de myChar antes de chamar foo", myChar
+
+    c = foo(a, b, myChar)
+    
+    print "valor de a depois de chamar foo", a
+    print "valor de b depois de chamar foo", b
+    print "valor de myChar depois de chamar foo", myChar
+};

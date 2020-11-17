@@ -50,8 +50,8 @@ void tacPrint(TAC* tac)
     case TAC_BEGINFUN:   printf("TAC_BEGINFUN"); break;
     case TAC_ENDFUN:     printf("TAC_ENDFUN"); break;
     case TAC_FUNCALL:    printf("TAC_FUNCALL"); break;
-    case TAC_BEGIN_ARG:   printf("TAC_BEGIN_ARG"); break;
     case TAC_FUNC_ARG:   printf("TAC_FUNC_ARG"); break;
+    case TAC_BEGIN_ARG:   printf("TAC_BEGIN_ARG"); break;
     case TAC_VEC_ACCESS: printf("TAC_VEC_ACCESS"); break;
     default: printf("TAC_UNDEFINED"); break;
   }

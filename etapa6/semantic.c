@@ -532,7 +532,7 @@ void validate_FUNC_PARAMETERS_DEC(AST * node)
     {
         char* param_name = get_scope_var_name_at_index(node->son[0]->symbol, variables_counter++); // TODO fix that shit
         HASH_NODE* param_node = hashFind(param_name);
-        param_node->data_type = DATATYPE_ERROR;
+        // param_node->data_type = DATATYPE_ERROR;
         param_node->type = SYMBOL_USED_LOCAL_VARIABLE;
         
     }
