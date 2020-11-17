@@ -738,6 +738,7 @@ void printLiteral(TAC* tac, FILE* fout)
     setId(node, &actualLiteralLabel);
     if (actualID == actualLiteralLabel)
     {
+        callPrintLiteral(node->id, fout);
         return;
     }
     
