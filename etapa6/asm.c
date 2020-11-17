@@ -627,7 +627,6 @@ void restoreArgvVariables(TAC* tac, FILE* fout)
         actual_func_index++;
         
     }
-    
 }
 
 void processFuncCall(TAC* tac, FILE* fout)
@@ -635,7 +634,9 @@ void processFuncCall(TAC* tac, FILE* fout)
     callFunction(tac->op1->text, fout);
     saveFloatRegisterToFloatVar(tac->res->text, fout);
 
-    restoreArgvVariables(tac, fout);
+    // This is not necessary and even impossible due to semantic verification does not allow variables and/or parameters with same name 
+    //restoreArgvVariables(tac, fout);
+    // It should be used in case we accept global variables with same name as parameters or parameters of differente funcs with same name
 }
 
 void processRead(TAC* tac, FILE* fout)
