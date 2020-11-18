@@ -10,6 +10,8 @@ int isMainFunction = 0;
 VALUES_LIST* literals_to_print = NULL;
 
 HASH_NODE* actual_func_node = NULL;
+
+HASH_NODE* node_func_being_called = NULL;
 int actual_func_index = 0;
 int actual_func_params_count = 0;
 VALUES_LIST* parameters_names = NULL;
@@ -223,6 +225,7 @@ void stackPositionToFloatRegister(int position, FILE* fout)
 {
     fprintf(fout, "\tmovss 	%d(%%rbp), %%xmm0\n", -4 * position);
 }
+
 void floatRegisterToStack(int registerNumber, FILE* fout)
 {
     fprintf(fout, "\tmovss	%%xmm%d, %d(%%rbp)\n", registerNumber, -4 * actual_func_index);
@@ -539,9 +542,9 @@ void processReturn(TAC* tac, FILE* fout)
 
 void processFuncArg(TAC* tac, FILE* fout)
 {
-    fprintf(fout, "\t# processFuncArg\n");
-    processOperandToFloatRegister(tac->res, DEFAULT_REGISTER, fout);
-    floatRegisterToStack(DEFAULT_REGISTER, fout);
+    fprintf(fout, "\t# TAC_ARGV\n");
+    //processOperandToFloatRegister(tac->res, DEFAULT_REGISTER, fout);
+    //floatRegisterToStack(DEFAULT_REGISTER, fout);
 
     if (parameters_names == NULL)
     {
@@ -553,9 +556,8 @@ void processFuncArg(TAC* tac, FILE* fout)
     }
 
     
-    
     HASH_NODE* srcNode = hashFind(tac->res->text);
-    HASH_NODE* dstNode = hashFind(get_scope_var_name_at_index(actual_func_node, actual_func_index+1));
+    HASH_NODE* dstNode = hashFind(get_scope_var_name_at_index(node_func_being_called, actual_func_index+1));
 
     processOperandToFloatRegister(srcNode, DEFAULT_REGISTER, fout);
     if (isFloatVariable(dstNode->data_type))
@@ -567,16 +569,8 @@ void processFuncArg(TAC* tac, FILE* fout)
         saveFloatRegisterToIntVar(dstNode->text, fout);
     }
     
-    fprintf(fout, "\t# End processFuncArg\n");
+    fprintf(fout, "\t# End TAC_ARGV\n");
     actual_func_index++;
-}
-
-void processBeginArg(TAC* tac, FILE* fout)
-{
-    actual_func_node = hashFind(tac->res->text);
-    actual_func_params_count = get_scope_len(actual_func_node);
-    actual_func_index = 0;
-    allocateStackSpace(fout);
 }
 
 char* getActualParamName(TAC* tac, int i, FILE* fout)
@@ -599,13 +593,39 @@ char* getActualParamName(TAC* tac, int i, FILE* fout)
     }
 }
 
+void processBeginArg(TAC* tac, FILE* fout)
+{
+    fprintf(fout, "\t# TAC_BEGIN_ARG - save local variables\n");
+    int i;
+    node_func_being_called = hashFind(tac->res->text);
+    actual_func_params_count = get_scope_len(node_func_being_called);
+    allocateStackSpace(fout);
+    
+    HASH_NODE* nodeToSave;
+    actual_func_index = 0;
+    // printf("to em %s chamando %s \n", actual_func_node->text, node_func_being_called->text);
+    for (i = 0; i < get_scope_len(actual_func_node); i++)
+    {
+        nodeToSave = hashFind(get_scope_var_name_at_index(actual_func_node, i+1));
+        // printf("deveria salvar %s \n\n", nodeToSave->text);
+        if (nodeToSave->type == SYMBOL_USED_LOCAL_VARIABLE)
+        {
+            processOperandToFloatRegister(nodeToSave, DEFAULT_REGISTER, fout);
+            floatRegisterToStack(DEFAULT_REGISTER, fout);
+        }
+        actual_func_index++;
+    }
+
+    actual_func_index = 0;
+    fprintf(fout, "\t# End TAC_BEGIN_ARG - save local variables\n");
+}
+
 void restoreStackVariable(HASH_NODE* node, FILE* fout)
 {
     stackPositionToFloatRegister(actual_func_index, fout);
 
     if (isFloatVariable(node->data_type))
     {
-        fprintf(fout, "# entrei float\n");
         saveFloatRegisterToFloatVar(node->text, fout);
     }
     else
@@ -615,19 +635,23 @@ void restoreStackVariable(HASH_NODE* node, FILE* fout)
 }
 void restoreArgvVariables(TAC* tac, FILE* fout)
 {
+    fprintf(fout, "\t# Restore arg\n");
     int i;
-    HASH_NODE* node;
+    HASH_NODE* nodeToRestore;
     actual_func_index = 0;
-    for (i = 0; i < actual_func_params_count; i++)
+    // printf("to em %s chamando %s \n", actual_func_node->text, node_func_being_called->text);
+    for (i = 0; i < get_scope_len(actual_func_node); i++)
     {
-        node = hashFind(getActualParamName(tac, i, fout));
-        if ( (node->type == SYMBOL_VARIABLE || node->type == SYMBOL_USED_LOCAL_VARIABLE) && node->data_type != DATATYPE_UNDEFINED)
+        nodeToRestore = hashFind(get_scope_var_name_at_index(actual_func_node, i+1));
+        // printf("deveria restaurar %s \n\n", nodeToRestore->text);
+        if (nodeToRestore->type == SYMBOL_USED_LOCAL_VARIABLE)
         {
-            restoreStackVariable(node, fout); 
+            restoreStackVariable(nodeToRestore, fout); 
         }
         actual_func_index++;
         
     }
+    fprintf(fout, "\t# End Restore arg\n");
 }
 
 void processFuncCall(TAC* tac, FILE* fout)
@@ -636,7 +660,7 @@ void processFuncCall(TAC* tac, FILE* fout)
     saveFloatRegisterToFloatVar(tac->res->text, fout);
 
     // This is not necessary and even impossible due to semantic verification does not allow variables and/or parameters with same name 
-    //restoreArgvVariables(tac, fout);
+    restoreArgvVariables(tac, fout);
     // It should be used in case we accept global variables with same name as parameters or parameters of differente funcs with same name
 }
 
@@ -924,6 +948,7 @@ void generateASM(TAC* first)
         {
             case TAC_BEGINFUN:
                 actualFunctionLabel = actualLabel++;
+                actual_func_node = hashFind(tac->res->text);
                 fprintf(fout, "%s:\n", tac->res->text);
                 if (strcmp(tac->res->text, "main") == 0)
                 {
