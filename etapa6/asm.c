@@ -324,7 +324,7 @@ void processOperandToFloatRegister(HASH_NODE* op, int registerNumber, FILE* fout
         long int floatInInteger = castFloatHexStringToInt(op->text);
         floatNumToFloatRegister(floatInInteger, registerNumber, fout);
     }
-    else if (op->type == SYMBOL_VARIABLE)
+    else if (op->type == SYMBOL_VARIABLE || op->type == SYMBOL_USED_LOCAL_VARIABLE)
     {
         if (isFloatVariable(op->data_type))
         {
@@ -378,7 +378,7 @@ void processCopyVec(TAC* tac, FILE* fout)
 
 void testAndZeroOperator(HASH_NODE* op, FILE* fout)
 {
-    if (op->type == SYMBOL_VARIABLE)
+    if (op->type == SYMBOL_VARIABLE || op->type == SYMBOL_USED_LOCAL_VARIABLE)
     {
         testZeroFloatVar(op->text, fout);
     }
@@ -539,6 +539,7 @@ void processReturn(TAC* tac, FILE* fout)
 
 void processFuncArg(TAC* tac, FILE* fout)
 {
+    fprintf(fout, "\t# processFuncArg\n");
     processOperandToFloatRegister(tac->res, DEFAULT_REGISTER, fout);
     floatRegisterToStack(DEFAULT_REGISTER, fout);
 
@@ -566,7 +567,7 @@ void processFuncArg(TAC* tac, FILE* fout)
         saveFloatRegisterToIntVar(dstNode->text, fout);
     }
     
-    
+    fprintf(fout, "\t# End processFuncArg\n");
     actual_func_index++;
 }
 
@@ -620,7 +621,7 @@ void restoreArgvVariables(TAC* tac, FILE* fout)
     for (i = 0; i < actual_func_params_count; i++)
     {
         node = hashFind(getActualParamName(tac, i, fout));
-        if (node->type == SYMBOL_VARIABLE && node->data_type != DATATYPE_UNDEFINED)
+        if ( (node->type == SYMBOL_VARIABLE || node->type == SYMBOL_USED_LOCAL_VARIABLE) && node->data_type != DATATYPE_UNDEFINED)
         {
             restoreStackVariable(node, fout); 
         }
