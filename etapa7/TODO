@@ -1,0 +1,17 @@
+Casos de erro sintático tratado: 
+
+1 ➖ Falta de valor em declaração de variável 
+2 ➖ Falta de tipo na declaração de função
+3 ➖ Expressão inválida em atribuição de varaivel
+4 ➖ Expressão inválida como return
+5 ➖ Expressão inválida no expression list do print
+6 ➖ Falta fechar } no fim de um bloco 
+7 ➖ Expressão inválida como indice de vetor 
+8 ➖ Falta de , entre argumentos para chamada de função
+9 ➖ Falta de ; depois de declaração de variável
+10 ➖ Falta de = na declaração de função entre parametros e tipo
+11 ➖ Identificador no comando read
+12 ➖ Falta de ; depois de declaração de função 
+
+
+

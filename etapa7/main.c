@@ -67,6 +67,11 @@ int main(int argc, char **argv) {
 
   if (SemanticErrors || SyntaxErrors)
   {
+    if (SyntaxErrors)
+    {
+      printf("Syntax errors found! \n");
+    }
+    
     printf("Compilation ERROR! \n");
     return 4;
   }

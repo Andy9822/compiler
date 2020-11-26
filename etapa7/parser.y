@@ -98,19 +98,22 @@ programa: declist {$$ = $1; Root = $$; check_and_set_declarations(Root); check_o
 
 declist: vardec ';' declist {$$ = astCreate( AST_DECLIST, NULL, $1, $3, NULL, NULL, NULL); /*astPrint($1, 0);*/}
     | funcdec ';' declist   {$$ = astCreate( AST_DECLIST, NULL, $1, $3, NULL, NULL, NULL); /*astPrint($1, 0);*/}
-    | vardec error declist {$$ = astCreate( AST_UNDEFINED, NULL, NULL, $3, NULL, NULL, NULL); print_error("Expected ; after variable declaration\n");}
-    | funcdec error declist {$$ = astCreate( AST_UNDEFINED, NULL, NULL, $3, NULL, NULL, NULL); print_error("Expected ; after function declaration\n");}
+    | vardec error declist {$$ = astCreate( AST_UNDEFINED, NULL, $1, $3, NULL, NULL, NULL); print_error("Expected ; after variable declaration\n");}
+    | funcdec error declist {$$ = astCreate( AST_UNDEFINED, NULL, $1, $3, NULL, NULL, NULL); print_error("Expected ; after function declaration\n");}
     |                       {$$ = 0;}
     ;
 
 funcdec: TK_IDENTIFIER '(' ')' '=' vartype block                        {$$ = astCreate(AST_FUNC_VOID_DEC, 0, astCreateSymbol($1), $5, $6, 0, 0);}
     | TK_IDENTIFIER '(' assignment assignmentlist ')' '=' vartype block {$$ = astCreate(AST_FUNC_PARAMS_DEC, 0, astCreateSymbol($1), $3, $4, $7, $8);}
-    | TK_IDENTIFIER '(' ')' '=' error block                             {$$ = astCreate(AST_UNDEFINED, 0, astCreateSymbol($1), NULL, $6, 0, 0); print_error("Expected declarated function to have a type\n");}
+    | TK_IDENTIFIER '(' assignment assignmentlist ')' vartype block     {$$ = astCreate(AST_UNDEFINED, 0, astCreateSymbol($1), $3, $4, $6, $7); print_error("Expected ` = ´ character after parameters declaration\n");}
+    | TK_IDENTIFIER '(' ')' '=' block                                   {$$ = astCreate(AST_UNDEFINED, 0, astCreateSymbol($1), NULL, $5, 0, 0); print_error("Expected declarated function to have a type\n");}
     | TK_IDENTIFIER '(' ')' vartype block                               {$$ = astCreate(AST_UNDEFINED, 0, astCreateSymbol($1), $5, $5, 0, 0); print_error("Expected ` = ´ character after parameters declaration\n");}
+    | TK_IDENTIFIER '(' assignment assignmentlist ')' '=' error block {$$ = astCreate(AST_UNDEFINED, 0, astCreateSymbol($1), $3, $4, NULL, $8); print_error("Expected declarated function to have a type\n");}
     ;
 
 vardec: assignment ':' varliteral {$$ = astCreate(AST_VARDEC, 0, $1, $3, 0, 0, 0); /*fprintf(stderr, "Recebi varliteral %s\n", $3->symbol->text);*/}
     | vector                      {$$ = $1;}
+    | assignment ':' error {$$ = astCreate(AST_UNDEFINED, 0, $1, NULL, 0, 0, 0); print_error("Expected value in variable declaration\n");}
     ;
 
 vartype: KW_CHAR    {$$ = astCreateSymbol($1);}
@@ -135,10 +138,12 @@ vecvalues: varliteral vecvalues {$$ = astCreate(AST_VEC_INIT_VALUES, 0,  $1, $2,
     ;
 
 block: '{' lcmd '}' {$$ = astCreate(AST_BLOCK, 0,  $2, 0, 0, 0, 0);}
+    | '{' lcmd      {$$ = astCreate(AST_UNDEFINED, 0,  $2, 0, 0, 0, 0); print_error("Expected  }  at the end of the block\n");}
     ;
 
 lcmd: cmd lcmd      {$$ = astCreate(AST_LCMDL, 0,  $1, $2, 0, 0, 0);}
     | cmd           {$$ = astCreate(AST_LCMD, 0,  $1, 0, 0, 0, 0);}
+    | error lcmd    {$$ = astCreate(AST_LCMDL, 0,  NULL, $2, 0, 0, 0); print_error("Expected valid command\n");}
     ;
 
 cmd: atribuition    {$$ = $1;}
@@ -160,6 +165,7 @@ ifcommand: KW_IF '(' expression ')' KW_THEN cmd {$$ = astCreate(AST_IF, 0,  $3, 
     ;
 
 returncommand: KW_RETURN expression         {$$ = astCreate(AST_RETURN, 0,  $2, 0, 0, 0, 0);}
+    | KW_RETURN error                       {$$ = astCreate(AST_UNDEFINED, 0,  NULL, 0, 0, 0, 0); print_error("Expected valid expression for return command\n");}
     ;
 
 printcommand: KW_PRINT LIT_STRING printlist {$$ = astCreate(AST_PRINTCMD, 0,  astCreateSymbol($2), $3, 0, 0, 0);}
@@ -168,18 +174,22 @@ printcommand: KW_PRINT LIT_STRING printlist {$$ = astCreate(AST_PRINTCMD, 0,  as
 
 printlist: ',' LIT_STRING printlist         {$$ = astCreate(AST_PRINTLIST, 0,  astCreateSymbol($2), $3, 0, 0, 0);}
     | ',' expression printlist              {$$ = astCreate(AST_PRINTLIST, 0,  $2, $3, 0, 0, 0);}
+    | ',' error printlist                   {$$ = astCreate(AST_UNDEFINED, 0,  NULL, $3, 0, 0, 0); print_error("Expected valid expression as argument for print\n");}
     |                                       {$$ = 0;}
     ;
 
 readcommand: KW_READ TK_IDENTIFIER          {$$ = astCreate(AST_READ, 0,  astCreateSymbol($2), 0, 0, 0, 0);}
+    | KW_READ error                         {$$ = astCreate(AST_UNDEFINED, 0,  NULL, 0, 0, 0, 0); print_error("Expected identifier after read command\n");}
     ;
 
 atribuition: TK_IDENTIFIER '=' expression { $$ = astCreate(AST_ATRIBUITION, 0,  astCreateSymbol($1), $3, 0, 0, 0);}
     | TK_IDENTIFIER '[' expression ']' '=' expression {$$ = astCreate(AST_ATRIBUITION_VEC, 0, astCreateSymbol($1), $3, $6, 0, 0);}
+    | TK_IDENTIFIER '=' error { $$ = astCreate(AST_UNDEFINED, 0,  astCreateSymbol($1), NULL, 0, 0, 0); print_error("Expected valid expression in variable attribution\n");}
     ;
 
 expression: TK_IDENTIFIER               {$$ = astCreateSymbol($1);}
     | TK_IDENTIFIER  '[' expression ']' {$$ = astCreate(AST_VECTOR_ACCESS, 0, astCreateSymbol($1), $3, 0, 0, 0);}
+    | TK_IDENTIFIER  '[' error ']'      {$$ = astCreate(AST_UNDEFINED, 0, astCreateSymbol($1), NULL, 0, 0, 0); print_error("Expected valid expression as index for vector access\n");}
     | varliteral                        {$$ = $1;}
     | expression '+' expression         {$$ = astCreate(AST_ADD, 0, $1, $3, 0, 0, 0);}
     | expression '-' expression         {$$ = astCreate(AST_SUB, 0, $1, $3, 0, 0, 0);}
@@ -212,6 +222,7 @@ functioncall: TK_IDENTIFIER '(' ')'                     {$$ = astCreate(AST_FUNC
     ;
     
 expressionlist: ',' expression expressionlist           {$$ = astCreate(AST_EXPRESSION_LIST, 0, $2, $3, 0, 0, 0);}
+    | expression expressionlist                         {$$ = astCreate(AST_UNDEFINED, 0, $1, $2, 0, 0, 0); print_error("Expected  ,  to separate arguments in function call\n");}
     |                                                   {$$ = 0;}
     ;
 
