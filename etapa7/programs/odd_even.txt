@@ -1,0 +1,20 @@
+
+i = int: 4;
+resto = int: 4;
+
+main () = int 
+{
+    
+
+    i = 0
+    while ( i < 0A)
+    {
+        resto = i / 2
+        if (resto * 2 == i) then
+            print i, "eh par\n"
+        else
+            print i, "eh impar\n"
+
+        i = i+1
+    }
+};
