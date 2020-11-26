@@ -1,0 +1,9 @@
+foo (x = int) = float
+{
+    return x * 2 + 1
+};
+
+main () = int 
+{
+    print "foo de 5:", foo(5)
+};

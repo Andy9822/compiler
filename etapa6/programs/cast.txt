@@ -1,0 +1,17 @@
+myFloat = float: 0FA;
+myInt = int: 0FA;
+
+
+main () = int 
+{
+    myInt = 5.4
+    print "myInt= recebe 5.4, logo myInt eh:", myInt, ""
+    myInt = 9
+    print "myInt recebe 9, logo myInt eh:", myInt, ""
+
+    myFloat = 5
+    print "myFloat recebe 5, logo myFloat eh:", myFloat, ""
+    myFloat = 4.4
+    print "myFloat recebe 4.4, logo myFloat eh:", myFloat, ""
+    
+};

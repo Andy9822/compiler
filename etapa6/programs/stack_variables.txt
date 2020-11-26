@@ -1,5 +1,4 @@
 c = float: 0;
-
 a = int: 8;
 b = float: 9;
 myChar = char: 47;
