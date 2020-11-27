@@ -1,6 +1,7 @@
 // AST - Abstract Syntax Tree
 
 #include "ast.h"
+#include "asm.h"
 
 AST *astCreate(int type, HASH_NODE *symbol, AST* s0, AST* s1, AST* s2, AST* s3, AST* s4) 
 {
@@ -98,6 +99,123 @@ AST *astPrint(AST *node, int level)
  
 }
 
+void join_operands_arithmetic(AST *node, HASH_NODE* op1, HASH_NODE* op2, int op_type)
+{
+   int i;
+   if (op1->type == SYMBOL_LIT_FLOAT || op2->type == SYMBOL_LIT_FLOAT  )
+   {
+      return;
+   }
 
+   unsigned int op1_value = strtol(op1->text, NULL, 16);
+   unsigned int op2_value = strtol(op2->text, NULL, 16);
 
+   unsigned int result;
+   switch (op_type)
+   {
+      case AST_ADD:
+         result = op1_value + op2_value;
+         break;
+      case AST_SUB:
+         result = op1_value - op2_value;
+         break;
+      case AST_MULT:
+         result = op1_value * op2_value;
+         break;
+      case AST_DIV:
+         result = op1_value / op2_value;
+         break;
+   }
+
+   char *result_str = (char *)malloc(64 * sizeof(char));
+   sprintf(result_str, "0%X", result);
+   int lit_type = (op1->type < op2->type) ? op1->type : op2->type;
+
+   node->type = AST_SYMBOL;
+   node->symbol = hashInsert(result_str, lit_type);
+   for ( i = 0; i < MAX_SONS; i++)
+   {
+      node->son[i] = NULL;
+   }
+   printf("sai c resul: %s \n", result_str);
+}
+
+void constant_fold_arithmetic(AST *node, int op_type)
+{
+   HASH_NODE* op1 = NULL;
+   HASH_NODE* op2 = NULL;
+   
+   // We have to take care if op1 is a symbol or a symbol inside a parenthesis
+   if (node->son[0]->type == AST_SYMBOL) 
+   {
+      op1 = node->son[0]->symbol;
+   }
+   else if (node->son[0]->type == AST_PARENTHESIS)
+   {
+      if (node->son[0]->son[0]->type == AST_SYMBOL)
+      {
+         op1 = node->son[0]->son[0]->symbol;
+      }
+   } 
+
+   // We have to take care if op2 is a symbol or a symbol inside a parenthesis
+   if (node->son[1]->type == AST_SYMBOL) 
+   {
+      op2 = node->son[1]->symbol;
+   }
+   else if (node->son[1]->type == AST_PARENTHESIS)
+   {
+      if (node->son[1]->son[0]->type == AST_SYMBOL)
+      {
+         op2 = node->son[1]->son[0]->symbol;
+      }
+   } 
+      
+   // If both op are valid symbols we process and join them
+   if (op1 && op2)
+   {
+      join_operands_arithmetic(node, op1, op2, op_type);
+   }
+}
+
+void fold_optimization(AST *node)
+{
+   int i;
+
+   if (node ==0 )
+   {
+      return;
+   }
+
+   for (i = 0; i < MAX_SONS; i++)
+   {
+      fold_optimization(node->son[i]);
+   }
+
+   switch (node->type)
+   {
+   
+      case AST_ADD:
+      case AST_SUB:
+      case AST_MULT:
+      case AST_DIV:
+         constant_fold_arithmetic(node, node->type);
+         break;
+      case AST_GREATER: break;
+      case AST_LESSER: break;
+      case AST_OR: break;
+      case AST_AND: break;
+      case AST_NOT: break;
+      case AST_MINUS: break;
+      case AST_DIF: break;
+      case AST_EQ: break;
+      case AST_GE: break;
+      case AST_LE: break;
+   }
+}
+
+void ast_optimize(AST *node) 
+{
+   fold_optimization(node);
+}
 

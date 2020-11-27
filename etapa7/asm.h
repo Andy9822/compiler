@@ -15,4 +15,6 @@
 
 void generateASM(TAC* first);
 
+int castFloatHexStringToInt(char* string);
+
 #endif // MACRO

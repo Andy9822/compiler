@@ -79,6 +79,7 @@ AST *astPrint(AST *node, int level);
 // Alias for creating easilys and compactly an ast_symbol
 #define astCreateSymbol(x) astCreate(AST_SYMBOL, x, 0, 0, 0, 0, 0)
 
+void ast_optimize(AST *node);
 
 #endif // AST_HEADR
 

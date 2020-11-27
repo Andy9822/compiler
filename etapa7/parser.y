@@ -93,7 +93,7 @@ int yyerror();
 
 %%
 
-programa: declist {$$ = $1; Root = $$; check_and_set_declarations(Root); check_operands(Root, 0); check_undeclared(); TAC_code=generateCode($1); tacPrintBackwards(TAC_code); TAC_code=tacReverse(TAC_code);}
+programa: declist {$$ = $1; Root = $$; ast_optimize(Root); check_and_set_declarations(Root); check_operands(Root, 0); check_undeclared(); TAC_code=generateCode($1); tacPrintBackwards(TAC_code); TAC_code=tacReverse(TAC_code);}
     ;
 
 declist: vardec ';' declist {$$ = astCreate( AST_DECLIST, NULL, $1, $3, NULL, NULL, NULL); /*astPrint($1, 0);*/}
