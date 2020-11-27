@@ -1,4 +1,7 @@
 // AST - Abstract Syntax Tree
+#define ARITHMETIC_CATEGORY 1
+#define BOOLEAN_CATEGORY 2
+#define COMPARATOR_CATEGORY 3
 
 #include "ast.h"
 #include "asm.h"
@@ -103,7 +106,6 @@ void join_operands_boolean(AST *node, HASH_NODE* op1, HASH_NODE* op2, int op_typ
 {
    int i;
 
-   printf("processando join booleano \n");
    int op1_value = strcmp("TRUE", op1->text) == 0;
    int op2_value = strcmp("TRUE", op2->text) == 0;
    
@@ -116,6 +118,42 @@ void join_operands_boolean(AST *node, HASH_NODE* op1, HASH_NODE* op2, int op_typ
          break;
       case AST_OR:
          result = op1_value || op2_value;
+         break;
+   }
+
+   node->type = AST_SYMBOL;
+   node->symbol = hashInsert(result ? "TRUE" : "FALSE", SYMBOL_LIT_TRUE);
+   for ( i = 0; i < MAX_SONS; i++)
+   {
+      node->son[i] = NULL;
+   }
+}
+
+void join_operands_comparator(AST *node, HASH_NODE* op1, HASH_NODE* op2, int op_type)
+{
+   int i;
+   if (op1->type == SYMBOL_LIT_FLOAT || op2->type == SYMBOL_LIT_FLOAT  )
+   {
+      return;
+   }
+
+   unsigned int op1_value = strtol(op1->text, NULL, 16);
+   unsigned int op2_value = strtol(op2->text, NULL, 16);
+
+   int result;
+   switch (op_type)
+   {
+      case AST_GREATER:
+         result = op1_value > op2_value;
+         break;
+      case AST_LESSER:
+         result = op1_value < op2_value;
+         break;
+      case AST_GE:
+         result = op1_value >= op2_value;
+         break;
+      case AST_LE:
+         result = op1_value <= op2_value;
          break;
    }
 
@@ -165,10 +203,9 @@ void join_operands_arithmetic(AST *node, HASH_NODE* op1, HASH_NODE* op2, int op_
    {
       node->son[i] = NULL;
    }
-   printf("sai c resul: %s \n", result_str);
 }
 
-void constant_fold_operation(AST *node, int op_type, int isArithmetic)
+void constant_fold_operation(AST *node, int ast_type, int op_category)
 {
    HASH_NODE* op1 = NULL;
    HASH_NODE* op2 = NULL;
@@ -202,13 +239,17 @@ void constant_fold_operation(AST *node, int op_type, int isArithmetic)
    // If both op are valid symbols we process and join them
    if (op1 && op2)
    {
-      if (isArithmetic)
+      if (op_category == ARITHMETIC_CATEGORY)
       {
-         join_operands_arithmetic(node, op1, op2, op_type);
+         join_operands_arithmetic(node, op1, op2, ast_type);
       }
-      else
+      else if (op_category == BOOLEAN_CATEGORY)
       {
-         join_operands_boolean(node, op1, op2, op_type);
+         join_operands_boolean(node, op1, op2, ast_type);
+      } 
+      else if (op_category == COMPARATOR_CATEGORY)
+      {
+         join_operands_comparator(node, op1, op2, ast_type);
       } 
    }
 }
@@ -234,24 +275,19 @@ void fold_optimization(AST *node)
       case AST_SUB:
       case AST_MULT:
       case AST_DIV:
-         constant_fold_operation(node, node->type, 1);
-         break;
-
-      case AST_DIF:
-      case AST_EQ:
-      case AST_NOT:
+         constant_fold_operation(node, node->type, ARITHMETIC_CATEGORY);
          break;
 
       case AST_GREATER:
       case AST_LESSER:
-      case AST_MINUS:
       case AST_GE:
       case AST_LE:
+         constant_fold_operation(node, node->type, COMPARATOR_CATEGORY);
          break;
 
       case AST_OR:
       case AST_AND:
-         constant_fold_operation(node, node->type, 0);
+         constant_fold_operation(node, node->type, BOOLEAN_CATEGORY);
          break;
    }
 }
