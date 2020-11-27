@@ -99,6 +99,34 @@ AST *astPrint(AST *node, int level)
  
 }
 
+void join_operands_boolean(AST *node, HASH_NODE* op1, HASH_NODE* op2, int op_type)
+{
+   int i;
+
+   printf("processando join booleano \n");
+   int op1_value = strcmp("TRUE", op1->text) == 0;
+   int op2_value = strcmp("TRUE", op2->text) == 0;
+   
+
+   int result;
+   switch (op_type)
+   {
+      case AST_AND:
+         result = op1_value && op2_value;
+         break;
+      case AST_OR:
+         result = op1_value || op2_value;
+         break;
+   }
+
+   node->type = AST_SYMBOL;
+   node->symbol = hashInsert(result ? "TRUE" : "FALSE", SYMBOL_LIT_TRUE);
+   for ( i = 0; i < MAX_SONS; i++)
+   {
+      node->son[i] = NULL;
+   }
+}
+
 void join_operands_arithmetic(AST *node, HASH_NODE* op1, HASH_NODE* op2, int op_type)
 {
    int i;
@@ -140,7 +168,7 @@ void join_operands_arithmetic(AST *node, HASH_NODE* op1, HASH_NODE* op2, int op_
    printf("sai c resul: %s \n", result_str);
 }
 
-void constant_fold_arithmetic(AST *node, int op_type)
+void constant_fold_operation(AST *node, int op_type, int isArithmetic)
 {
    HASH_NODE* op1 = NULL;
    HASH_NODE* op2 = NULL;
@@ -174,7 +202,14 @@ void constant_fold_arithmetic(AST *node, int op_type)
    // If both op are valid symbols we process and join them
    if (op1 && op2)
    {
-      join_operands_arithmetic(node, op1, op2, op_type);
+      if (isArithmetic)
+      {
+         join_operands_arithmetic(node, op1, op2, op_type);
+      }
+      else
+      {
+         join_operands_boolean(node, op1, op2, op_type);
+      } 
    }
 }
 
@@ -199,18 +234,25 @@ void fold_optimization(AST *node)
       case AST_SUB:
       case AST_MULT:
       case AST_DIV:
-         constant_fold_arithmetic(node, node->type);
+         constant_fold_operation(node, node->type, 1);
          break;
-      case AST_GREATER: break;
-      case AST_LESSER: break;
-      case AST_OR: break;
-      case AST_AND: break;
-      case AST_NOT: break;
-      case AST_MINUS: break;
-      case AST_DIF: break;
-      case AST_EQ: break;
-      case AST_GE: break;
-      case AST_LE: break;
+
+      case AST_DIF:
+      case AST_EQ:
+      case AST_NOT:
+         break;
+
+      case AST_GREATER:
+      case AST_LESSER:
+      case AST_MINUS:
+      case AST_GE:
+      case AST_LE:
+         break;
+
+      case AST_OR:
+      case AST_AND:
+         constant_fold_operation(node, node->type, 0);
+         break;
    }
 }
 
